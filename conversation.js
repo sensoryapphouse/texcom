@@ -122,16 +122,9 @@
     }
 
     function askToAllow(name, yes, no) {
-        const run = () => {
-            if (typeof Notiflix !== 'undefined' && Notiflix.Confirm) {
-                Notiflix.Confirm.show('Someone wants to join', name + ' wants to join your conversation.', 'Allow', 'Decline', yes, no, {
-                    okButtonBackground: '#16a34a', okButtonColor: '#ffffff', cancelButtonBackground: '#e2e8f0', cancelButtonColor: '#1e293b',
-                    titleFontSize: '22px', messageFontSize: '18px', buttonsFontSize: '18px', width: '340px', messageMaxLength: 200, fontFamily: 'inherit'
-                });
-            } else if (confirm(name + ' wants to join your conversation. Allow?')) yes(); else no();
-        };
         if (typeof speak === 'function' && params && params.readPartnerAloud) speak(name + ' wants to join.', true);
-        run();
+        askConfirm({ title: 'Someone wants to join', message: name + ' wants to join your conversation.', ok: 'Allow', cancel: 'Decline' })
+            .then(allowed => (allowed ? yes() : no()));
     }
 
     function accept(c, name) {

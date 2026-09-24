@@ -160,16 +160,8 @@ function deleteFromEditor() {
         closeItemEditor();
         afterListChange();
     };
-    if (typeof Notiflix !== 'undefined' && Notiflix.Confirm) {
-        Notiflix.Confirm.show('Delete', 'Delete "' + name + '"?', 'Delete', 'Keep', doDelete, () => {}, {
-            okButtonBackground: '#dc2626', okButtonColor: '#ffffff',
-            cancelButtonBackground: '#e2e8f0', cancelButtonColor: '#1e293b',
-            titleFontSize: '22px', messageFontSize: '18px', buttonsFontSize: '18px',
-            width: '340px', messageMaxLength: 200, fontFamily: 'inherit'
-        });
-    } else if (confirm('Delete "' + name + '"?')) {
-        doDelete();
-    }
+    askConfirm({ title: 'Delete', message: 'Delete “' + name + '”?', ok: 'Delete', cancel: 'Keep', danger: true })
+        .then(yes => { if (yes) doDelete(); });
 }
 
 // Refresh filters, the selected-category highlight, the toggle label and the edit pencils

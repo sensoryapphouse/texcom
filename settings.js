@@ -27,6 +27,45 @@ var jsonString;
 var smallPortrait = false;
 var switchInput = "Press"; // save "Press", "Release" or "Hover" for params.selectWith and params.selectWithSwitchScan (later is for scanning and Cursor Keys/Dpad)
 
+// A yes/no question in TexCom's own dialog: real buttons (Notiflix used links, which screen readers announce
+// as links, with a green "Delete" and small text), the app's theme, Escape or a tap outside to cancel.
+// askConfirm({ title, message, ok, cancel, danger }) -> Promise<boolean>
+window.askConfirm = function (opts) {
+    const o = document.getElementById('askOverlay');
+    if (!o) return Promise.resolve(window.confirm(opts.message));
+    const okBtn = document.getElementById('askOk'), cancelBtn = document.getElementById('askCancel');
+    document.getElementById('askTitle').textContent = opts.title || '';
+    document.getElementById('askMessage').textContent = opts.message || '';
+    okBtn.textContent = opts.ok || 'OK';
+    cancelBtn.textContent = opts.cancel || 'Cancel';
+    okBtn.classList.toggle('danger', !!opts.danger);
+    okBtn.classList.toggle('primary', !opts.danger);
+    const returnFocus = document.activeElement;
+    o.hidden = false;
+    setTimeout(() => (opts.danger ? cancelBtn : okBtn).focus(), 50); // a risky action starts on the safe button
+    return new Promise(resolve => {
+        const done = (answer) => {
+            o.hidden = true;
+            okBtn.onclick = cancelBtn.onclick = o.onclick = null;
+            document.removeEventListener('keydown', onKey, true);
+            if (returnFocus && typeof returnFocus.focus === 'function' && document.contains(returnFocus)) returnFocus.focus();
+            resolve(answer);
+        };
+        const onKey = (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); done(false); }
+            else if (e.key === 'Tab') { // keep focus inside the dialog
+                const first = cancelBtn, last = okBtn;
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        };
+        okBtn.onclick = () => done(true);
+        cancelBtn.onclick = () => done(false);
+        o.onclick = (e) => { if (e.target === o) done(false); };
+        document.addEventListener('keydown', onKey, true);
+    });
+};
+
 // Notices (Notiflix.Notify): in front of everything, centred just below the toolbar so they never hide it,
 // large text, and colours with at least 4.5:1 contrast (the library's defaults were about 2.3:1)
 function initNotices() {
@@ -228,11 +267,8 @@ async function doSaveFile() {
 var fileObj;
 
 function askToSave() {
-    Notiflix.Confirm.show('TexCom', 'Current communicator has been changed. Do you want to save those changes?', 'yes', 'no', function () {
-        needToSave();
-    }, function () {
-        var fileLoad2 = document.getElementById('file-input').click();
-    });
+    askConfirm({ title: 'Save your changes?', message: 'You have changed this phrase set. Save it before opening another?', ok: 'Save', cancel: 'Don’t save' })
+        .then(save => { if (save) needToSave(); else document.getElementById('file-input').click(); });
     itemChanged = false;
     communicatorChanged = false;
 }
@@ -882,11 +918,9 @@ function addNewPhrases() {
         if (typeof Notiflix !== 'undefined' && Notiflix.Notify)
             Notiflix.Notify.success('Added ' + n + ' phrases to "New phrases". Keep the ones you like; delete the others in Edit mode.', { timeout: 8000 });
     };
-    const msg = 'Add ' + n + ' new TexCom phrases? They go into a "New phrases" category for you to look through. None of your own phrases are changed or removed.';
-    if (typeof Notiflix !== 'undefined' && Notiflix.Confirm) {
-        Notiflix.Confirm.show('New phrases', msg, 'Add them', 'Not now', go, () => {}, {
-            okButtonBackground: '#2563eb', okButtonColor: '#ffffff', cancelButtonBackground: '#e2e8f0', cancelButtonColor: '#1e293b',
-            titleFontSize: '22px', messageFontSize: '18px', buttonsFontSize: '18px', width: '360px', messageMaxLength: 300, fontFamily: 'inherit'
-        });
-    } else if (confirm(msg)) go();
+    askConfirm({
+        title: 'New phrases',
+        message: 'Add ' + n + ' new TexCom phrases? They go into a "New phrases" category for you to look through. None of your own phrases are changed or removed.',
+        ok: 'Add them', cancel: 'Not now',
+    }).then(yes => { if (yes) go(); });
 }

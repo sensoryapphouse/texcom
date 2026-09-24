@@ -43,7 +43,7 @@ var categoryList;
 var categoryName = "All";
 var iconSelect;
 
-var txHistory = [];
+var txHistory = [""]; // undo snapshots of the text box; starts with it empty (see pushHistory in sketch2.js)
 var placeInHistory = 0;
 
 var target;

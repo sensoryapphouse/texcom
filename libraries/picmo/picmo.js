@@ -10,7 +10,7 @@ var y = (o, e, t) => (K(o, e, "read from private field"), t ? t.call(o) : e.get(
 var g = (o, e, t) => (K(o, e, "access private method"), t);
 const Re = "14.0";
 function Me(o, e, t) {
-  let s = `https://cdn.jsdelivr.net/npm/emojibase-data@${e}/${o}`;
+  let s = `libraries/picmo/emojibase/${o}`; // TexCom: bundled, so the picker works offline (was jsDelivr)
   return typeof t == "function" ? s = t(o, e) : typeof t == "string" && (s = `${t}/${o}`), s;
 }
 async function re(o, e = {}) {
@@ -288,7 +288,7 @@ class We extends Ee {
   value: ke() }));
 
 function Je(o, e) {
-  const t = `https://cdn.jsdelivr.net/npm/emojibase-data@${o}/${e}`;
+  const t = `libraries/picmo/emojibase/${e}`; // TexCom: bundled, so the picker works offline (was jsDelivr)
   return {
     emojisUrl: `${t}/data.json`,
     messagesUrl: `${t}/messages.json` };

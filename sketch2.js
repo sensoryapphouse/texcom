@@ -14,8 +14,12 @@ function extractAIOptions(raw) {
         ];
     }
     
-    // Attempt 2: Pipe separated (what we asked for)
-    let pipeOpts = raw.split('|').map(s => s.trim().replace(/^["'*]+|["'*]+$/g, '')).filter(s => s.length > 0);
+    // Attempt 2: Pipe separated (what the apps send: three separate phrases joined with "|")
+    // A preamble before the first phrase ("Here are three replies: Yes|No|Maybe") is dropped
+    let piped = raw.includes('|')
+        ? raw.replace(/^[^|]{0,60}?\b(here are|here's|replies|options|suggestions|sure|okay|of course)\b[^|]{0,40}?:\s*/i, '')
+        : raw;
+    let pipeOpts = piped.split('|').map(s => s.trim().replace(/^["'*]+|["'*]+$/g, '')).filter(s => s.length > 0);
     if(pipeOpts.length >= 3) return pipeOpts.slice(-3); // If they prepend boilerplate and then use pipes
     
     // Attempt 3: If there are no pipes and no numbers, strip the polite boilerplate anyway
@@ -194,19 +198,47 @@ function updateCategoriesButton() {
     }
 }
 
-function pushHistory() {
-    undoButton.style.opacity = "1";
-    if (theText.value.length == 0) {
-        return;
+// Undo / redo for the text box: snapshots of what it said, with a pointer to where we are.
+// Typing is grouped (a snapshot 600ms after you stop), and a snapshot is taken before anything that replaces the
+// text (Clear, tapping a phrase). It used to skip empty text, so Undo after Clear did nothing.
+const UNDO_MAX = 250;
+let undoTimer = null;
+
+function pushHistory() { // kept for callers: take a snapshot now
+    clearTimeout(undoTimer);
+    const value = theText.value;
+    if (txHistory.length && txHistory[placeInHistory] === value) return;
+    txHistory.length = placeInHistory + 1;   // a new change drops anything that was redoable
+    txHistory.push(value);
+    if (txHistory.length > UNDO_MAX) txHistory.shift();
+    placeInHistory = txHistory.length - 1;
+    updateUndoButtons();
+}
+
+// While typing: one snapshot per pause, so Undo steps back in words, not letters
+function scheduleHistory() {
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(pushHistory, 600);
+}
+
+function updateUndoButtons() {
+    if (window.undoButton) {
+        const can = placeInHistory > 0;
+        undoButton.style.opacity = can ? "1" : ".5";
+        undoButton.disabled = !can;
     }
-    undoButton.style.opacity = "1";
-    redoButton.style.opacity = "0.5";
-    if (txHistory[txHistory.length - 1] != theText.value) {
-        if (txHistory.length > 250)
-            txHistory.shift();
-        placeInHistory = txHistory.length;
-        txHistory.push(theText.value);
+    if (window.redoButton) {
+        const can = placeInHistory < txHistory.length - 1;
+        redoButton.style.opacity = can ? "1" : ".5";
+        redoButton.disabled = !can;
     }
+}
+
+function applyHistory() { // put the snapshot we are on into the text box
+    theText.value = txHistory[placeInHistory] || "";
+    updateUndoButtons();
+    if (typeof theText.oninput === 'function') theText.oninput({ stopPropagation: () => {}, key: 'Unidentified' });
+    theText.focus();
 }
 
 window.onload = () => {
@@ -274,6 +306,8 @@ window.onload = () => {
             child.innerHTML = child.innerHTML + '<span class="edit"></span><span class="quick"></span>';
     }
 
+    updateUndoButtons(); // nothing to undo or redo yet
+
     theCategoriesButton.onclick = function (e) {
         if (freeVersion)
             return;
@@ -339,40 +373,17 @@ window.onload = () => {
         //        buttonPanel.hidden = true;
     }
     undoButton.onclick = function (e) {
-        window.sendLog('undoButton called. txHistory length: ' + txHistory.length + ', placeInHistory: ' + placeInHistory);
-        if (placeInHistory == txHistory.length - 1)
-            pushHistory();
+        clearTimeout(undoTimer);
+        pushHistory();               // capture anything typed since the last snapshot
+        if (placeInHistory <= 0) { updateUndoButtons(); return; }
         placeInHistory--;
-        if (placeInHistory < 0) {
-            placeInHistory = -1;
-            theText.value = "";
-            undoButton.style.opacity = ".5";
-            redoButton.style.opacity = "1";
-        } else {
-            undoButton.style.opacity = "1";
-            theText.value = txHistory[placeInHistory];
-            redoButton.style.opacity = "1";
-        }
-        console.log("Undo: ", placeInHistory);
-        if(typeof theText.oninput === 'function') theText.oninput({stopPropagation: () => {}, key: 'Unidentified'});
-        theText.focus();
+        applyHistory();
     }
     redoButton.onclick = function (e) {
-        window.sendLog('redoButton called. txHistory length: ' + txHistory.length + ', placeInHistory: ' + placeInHistory);
+        clearTimeout(undoTimer);
+        if (placeInHistory >= txHistory.length - 1) { updateUndoButtons(); return; }
         placeInHistory++;
-        if (placeInHistory >= txHistory.length) {
-            placeInHistory = txHistory.length - 1;
-            redoButton.style.opacity = ".5";
-        } else {
-            theText.value = txHistory[placeInHistory];
-            undoButton.style.opacity = "1";
-            redoButton.style.opacity = "1";
-        }
-        if(typeof theText.oninput === 'function') theText.oninput({stopPropagation: () => {}, key: 'Unidentified'});
-        theText.focus();
-        if(typeof theText.oninput === 'function') theText.oninput({stopPropagation: () => {}, key: 'Unidentified'});
-        undoButton.style.opacity = "1";
-        console.log("Redo: ", placeInHistory);
+        applyHistory();
     }
     yesButton.onclick = function (e) {
         speak('Yes');
@@ -667,6 +678,7 @@ window.receivePredictions = function(predsString) {
         // dictation, predictive-text taps and keyboards that send no key-up also filter the phrases
         clearTimeout(tmrKeys);
         tmrKeys = setTimeout(doPredict, 200);
+        scheduleHistory(); // group typing into one undo step per pause
         clearTimeout(textPredictDebounce);
         let box = document.getElementById('aiPredictionBox');
         if(box) box.style.display = 'none';
@@ -1217,10 +1229,9 @@ function setupSlip(list) {
                 }
                 if (filterPredict.length > 0)
                     theText.value = theText.value.substr(0, theText.value.length - filterPredict.length).trim();
-                if (theText.value.length == 0)
-                    theText.value = tmpS;
-                else
-                    theText.value += " " + tmpS;
+                // one space between phrases (it used to add a space to a phrase that already ended with one)
+                theText.value = (theText.value.trim() + ' ' + tmpS.trim()).trim() + ' ';
+                pushHistory(); // the inserted phrase is one undo step
                 // filter.value = "";
                 filterPredict = "";
                 updateList();

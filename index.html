@@ -90,6 +90,17 @@
         
         
 
+        <!-- Questions with a yes/no answer (askConfirm in settings.js): real buttons, TexCom's theme -->
+        <div id="askOverlay" class="ask-overlay" hidden>
+            <div class="ask-box" role="alertdialog" aria-modal="true" aria-labelledby="askTitle" aria-describedby="askMessage">
+                <h2 id="askTitle" class="ask-title"></h2>
+                <p id="askMessage" class="ask-message"></p>
+                <div class="ask-buttons">
+                    <button id="askCancel" class="ask-btn" type="button"></button>
+                    <button id="askOk" class="ask-btn primary" type="button"></button>
+                </div>
+            </div>
+        </div>
         <!-- Help (texcomhelp.html) in a panel over TexCom, so there is always a way back -->
         <div id="helpOverlay" class="help-overlay" hidden>
             <div class="help-box" role="dialog" aria-modal="true" aria-label="TexCom Help">
