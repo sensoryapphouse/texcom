@@ -1,0 +1,10 @@
+[General comments]
+A1
+B2
+C3
+
+[Symptoms]
+X1
+Y1
+Z1
+

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TexCom – Partner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#000000">
+    <!-- The partner's phone: the TexCom user's last phrase, very large, and a box to type a reply.
+         Opened from the QR code in TexCom (Settings > Partner display). Connects over the companion link (PeerJS). -->
+    <script src="libraries/peerjs.min.js"></script>
+    <style>
+        html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { display: flex; flex-direction: column; height: 100dvh; box-sizing: border-box;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+        #status { flex-shrink: 0; text-align: center; font-size: 16px; padding: 8px 12px; color: #9ca3af; }
+        #status.ok { color: #4ade80; }
+        #status.bad { color: #f87171; }
+        #stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 3vmin 4vmin; box-sizing: border-box; }
+        #phrase { width: 100%; max-height: 100%; text-align: center; font-weight: 600; line-height: 1.15;
+            overflow-wrap: break-word; transition: opacity 0.2s ease; }
+        #phrase.waiting { color: #6b7280; font-weight: 400; }
+        #reply { flex-shrink: 0; display: flex; gap: 10px; padding: 10px 12px 12px; background: #111827; }
+        #msgInput { flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; padding: 10px 14px; border-radius: 12px;
+            border: 2px solid #374151; background: #1f2937; color: #fff; font-size: 18px; } /* 16px+ stops iOS zooming */
+        #msgInput:focus { outline: none; border-color: #60a5fa; }
+        #sendBtn { min-width: 88px; min-height: 48px; border-radius: 12px; border: none; background: #2563eb; color: #fff;
+            font-size: 18px; font-weight: 600; cursor: pointer; }
+        #sendBtn:disabled, #msgInput:disabled { opacity: 0.5; }
+        .name-screen { position: fixed; inset: 0; z-index: 10; background: #000; display: flex; flex-direction: column;
+            justify-content: center; gap: 14px; padding: 24px; box-sizing: border-box; max-width: 520px; margin: 0 auto; }
+        .name-screen[hidden] { display: none; }
+        .name-screen h1 { margin: 0; font-size: 28px; }
+        .name-screen p { margin: 0; font-size: 18px; line-height: 1.4; color: #d1d5db; }
+        .name-screen label { font-size: 18px; font-weight: 600; }
+        .name-screen input { min-height: 52px; padding: 10px 14px; border-radius: 12px; border: 2px solid #374151;
+            background: #1f2937; color: #fff; font-size: 20px; }
+        .name-screen input:focus { outline: none; border-color: #60a5fa; }
+        .name-screen button { min-height: 52px; border-radius: 12px; border: none; background: #2563eb; color: #fff; font-size: 20px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <form id="nameScreen" class="name-screen" autocomplete="on" hidden>
+        <h1>TexCom conversation</h1>
+        <p>Someone using TexCom would like to talk with you. What should they call you?</p>
+        <label for="nameInput">Your name</label>
+        <input id="nameInput" name="name" type="text" maxlength="40" autocomplete="given-name" enterkeyhint="go" required>
+        <button type="submit">Join</button>
+    </form>
+    <div id="status" role="status">Connecting…</div>
+    <div id="stage"><div id="phrase" class="waiting" aria-live="polite">Waiting for a message…</div></div>
+    <form id="reply" autocomplete="off">
+        <label for="msgInput" style="position:absolute;left:-9999px">Your reply</label>
+        <input type="text" id="msgInput" placeholder="Type a reply…" enterkeyhint="send" disabled>
+        <button id="sendBtn" type="submit" disabled>Send</button>
+    </form>
+
+    <script>
+        const hostId = (new URLSearchParams(location.search).get('id') || '').replace(/^texcom-/i, '').toLowerCase();
+        const statusEl = document.getElementById('status');
+        const stage = document.getElementById('stage');
+        const phraseEl = document.getElementById('phrase');
+        const msgInput = document.getElementById('msgInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let peer = null, conn = null, retryTimer = null;
+
+        function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = cls || ''; }
+        function setConnected(on) { msgInput.disabled = sendBtn.disabled = !on; }
+
+        // Largest font size at which the phrase fits (same rule as partner.html)
+        function fit() {
+            const cs = getComputedStyle(stage);
+            const maxH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+            let lo = 16, hi = 400;
+            phraseEl.style.overflowWrap = 'normal'; // measure with whole words, so a word split across lines doesn't count as fitting
+            while (hi - lo > 1) {
+                const mid = (lo + hi) / 2;
+                phraseEl.style.fontSize = mid + 'px';
+                if (phraseEl.scrollHeight <= maxH && phraseEl.scrollWidth <= phraseEl.clientWidth + 1) lo = mid; else hi = mid;
+            }
+            phraseEl.style.fontSize = lo + 'px';
+            phraseEl.style.overflowWrap = lo <= 16 ? 'anywhere' : 'normal';
+        }
+
+        function showPhrase(text) {
+            text = String(text || '').trim();
+            if (!text) return;
+            phraseEl.classList.remove('waiting');
+            phraseEl.style.opacity = 0;
+            setTimeout(() => { phraseEl.textContent = text; fit(); phraseEl.style.opacity = 1; }, 120);
+        }
+
+        const RELAY_URL = 'https://texcom-relay.dave-c09.workers.dev/ice';
+        const FALLBACK_ICE = [{ urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.l.google.com:19302' }];
+        let myName = '', token = '', accepted = false, ended = false, hostName = '';
+
+        async function iceServers() {
+            try {
+                const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
+                const j = await (await fetch(RELAY_URL, { signal: ctl.signal, cache: 'no-store' })).json();
+                clearTimeout(t);
+                if (Array.isArray(j.iceServers) && j.iceServers.length) return j.iceServers;
+            } catch (e) {}
+            return FALLBACK_ICE;
+        }
+
+        // Each failed attempt is closed before the next (browsers refuse new WebRTC connections after a few hundred),
+        // and the wait grows: 3, 6, 12, 24, 30 s
+        let attempt = null, retries = 0;
+        function retryLater() {
+            clearTimeout(retryTimer);
+            if (attempt && attempt !== conn) { try { attempt.close(); } catch (e) {} }
+            attempt = null;
+            retries++;
+            retryTimer = setTimeout(connect, Math.min(30000, 3000 * Math.pow(2, retries - 1)));
+        }
+
+        function connect() {
+            clearTimeout(retryTimer);
+            if (ended || !peer || peer.destroyed || peer.disconnected) return;
+            setStatus(accepted ? 'Reconnecting…' : 'Connecting…');
+            if (attempt && attempt !== conn) { try { attempt.close(); } catch (e) {} }
+            const c = attempt = peer.connect('texcom-' + hostId, { reliable: true });
+            c.on('open', () => { retries = 0; c.send({ t: 'hello', name: myName, app: 'web', token }); if (!accepted) setStatus('Waiting to be let in…'); });
+            c.on('data', (msg) => {
+                if (!msg || typeof msg !== 'object') return;
+                if (msg.t === 'accepted') {
+                    accepted = true; token = msg.token || ''; hostName = String(msg.name || 'TexCom').slice(0, 40); conn = c;
+                    setStatus('Talking with ' + hostName, 'ok'); setConnected(true);
+                } else if (msg.t === 'declined') { finish('You weren’t let in to this conversation.'); }
+                else if (msg.t === 'busy') { finish('This conversation already has someone in it.'); }
+                else if (msg.t === 'bye') { finish(hostName + ' ended the conversation.'); }
+                else if (msg.t === 'say' && c === conn) showPhrase(msg.text); // the TexCom user's phrases
+            });
+            c.on('close', () => {
+                if (ended) return;
+                setConnected(false);
+                setStatus('Disconnected. Trying again…', 'bad');
+                retryLater();
+            });
+        }
+
+        function finish(text) {
+            ended = true; setConnected(false); setStatus(text, 'bad');
+            try { peer && peer.destroy(); } catch (e) {}
+        }
+
+        async function begin() {
+            if (typeof Peer === 'undefined') { setStatus('Couldn’t load the connection library.', 'bad'); return; }
+            peer = new Peer({ config: { iceServers: await iceServers() } });
+            peer.on('open', connect);
+            peer.on('error', (err) => {
+                if (ended) return;
+                setConnected(false);
+                if (err.type === 'peer-unavailable') {
+                    // An old link, or TexCom closed the conversation: give up after about 45 seconds of trying
+                    if (!accepted && retries >= 4) { finish('This conversation isn’t open. Ask for a new link.'); return; }
+                    setStatus('This conversation isn’t open. Trying again…', 'bad');
+                }
+                else if (err.type === 'network' || err.type === 'server-error') setStatus('No internet connection. Trying again…', 'bad');
+                else setStatus('Connection problem (' + err.type + '). Trying again…', 'bad');
+                retryLater();
+            });
+            peer.on('disconnected', () => { if (!ended && !peer.destroyed) { setStatus('Reconnecting…', 'bad'); peer.reconnect(); } });
+        }
+
+        const nameScreen = document.getElementById('nameScreen');
+        const nameInput = document.getElementById('nameInput');
+        if (!hostId) {
+            setStatus('This link is incomplete. Ask for the link again.', 'bad');
+        } else {
+            try { nameInput.value = localStorage.getItem('texcomPartnerName') || ''; } catch (e) {}
+            nameScreen.hidden = false;
+            setTimeout(() => nameInput.focus(), 50);
+            nameScreen.addEventListener('submit', (e) => {
+                e.preventDefault();
+                myName = nameInput.value.trim().slice(0, 40);
+                if (!myName) return;
+                try { localStorage.setItem('texcomPartnerName', myName); } catch (e) {}
+                nameScreen.hidden = true;
+                begin();
+            });
+        }
+        window.addEventListener('beforeunload', () => { try { if (conn && conn.open) conn.send({ t: 'bye' }); } catch (e) {} });
+
+        document.getElementById('reply').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = msgInput.value.trim();
+            if (!text || !conn || !conn.open) return;
+            conn.send({ t: 'say', text });
+            msgInput.value = '';
+            setStatus('Sent: ' + text, 'ok');
+        });
+
+        new ResizeObserver(fit).observe(stage); // any size change: window, rotation, on-screen keyboard
+        fit();
+    </script>
+</body>
+</html>

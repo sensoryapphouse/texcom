@@ -1,0 +1,213 @@
+.tooltipM {
+    font-family: Sans-Serif;
+    background-color: #333;
+    color: #ddd;
+    padding: 5px 7px;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 8000;
+    border-radius: 4px;
+    transition: visibility 0s .35s, opacity .35s, transform .35s
+}
+
+/* separation */
+.tooltipM.position-up {
+    margin-top: -10px
+}
+
+.tooltipM.position-down {
+    margin-top: 10px
+}
+
+.tooltipM.position-left {
+    margin-left: -10px
+}
+
+.tooltipM.position-right {
+    margin-left: 10px
+}
+
+/* animation */
+.tooltipM.visible {
+    visibility: visible;
+    animation: fadeInOut ease 8s;
+    -webkit-animation: fadeInOut ease 8s;
+    -moz-animation: fadeInOut ease 8s;
+    -o-animation: fadeInOut ease 8s;
+    -ms-animation: fadeInOut ease 8s;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.tooltipM.position-up {
+    transform: translateY(-5px)
+}
+
+.tooltipM.position-up.visible {
+    transform: translateY(0px)
+}
+
+.tooltipM.position-down {
+    transform: translateY(+5px)
+}
+
+.tooltipM.position-down.visible {
+    transform: translateY(0px)
+}
+
+.tooltipM.position-left {
+    transform: translateX(-5px)
+}
+
+.tooltipM.position-left.visible {
+    transform: translateX(0px)
+}
+
+.tooltipM.position-right {
+    transform: translateX(5px)
+}
+
+.tooltipM.position-right.visible {
+    transform: translateX(0px)
+}
+
+
+/* arrow */
+.arrow {
+    width: 0;
+    height: 0;
+    position: absolute
+}
+
+.tooltipM.position-down .arrow {
+    top: -6px;
+    border-bottom: 6px solid #333;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent
+}
+
+.tooltipM.position-up .arrow {
+    bottom: -6px;
+    border-top: 6px solid #333;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent
+}
+
+.tooltipM.position-left .arrow {
+    right: -6px;
+    border-left: 6px solid #333;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent
+}
+
+.tooltipM.position-right .arrow {
+    left: -6px;
+    border-right: 6px solid #333;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent
+}
+
+.tooltipM.position-vertical.align-left .arrow {
+    left: 4px
+}
+
+.tooltipM.position-vertical.align-center .arrow {
+    left: 50%;
+    margin-left: -4px
+}
+
+.tooltipM.position-vertical.align-right .arrow {
+    right: 4px
+}
+
+.tooltipM.position-horizontal.align-top .arrow {
+    top: 4px
+}
+
+.tooltipM.position-horizontal.align-center .arrow {
+    top: 50%;
+    margin-top: -4px
+}
+
+.tooltipM.position-horizontal.align-bottom .arrow {
+    bottom: 4px
+}
+
+/* custom tooltipM */
+.tooltipM.green {
+    border-radius: 8px;
+    font-family: Sans-Serif;
+    background-color: #AED7D7;
+    color: black;
+}
+
+.tooltipM.green.position-down .arrow {
+    top: -6px;
+    border-bottom: 6px solid #72de63;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent
+}
+
+.tooltipM.green.position-up .arrow {
+    bottom: -6px;
+    border-top: 6px solid #72de63;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent
+}
+
+.tooltipM.green.position-left .arrow {
+    right: -6px;
+    border-left: 6px solid #72de63;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent
+}
+
+.tooltipM.green.position-right .arrow {
+    left: -6px;
+    border-right: 6px solid #72de63;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent
+}
+
+.tooltipM.green.visible {
+    visibility: visible;
+    animation: fadeInOut2 ease 8s;
+    -webkit-animation: fadeInOut2 ease 8s;
+    -moz-animation: fadeInOut2 ease 8s;
+    -o-animation: fadeInOut2 ease 8s;
+    -ms-animation: fadeInOut2 ease 8s;
+}
+
+@keyframes fadeInOut2 {
+    0% {
+        opacity: 0;
+    }
+
+    25% {
+        opacity: var(--change);
+    }
+
+    50% {
+        opacity: var(--change);
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

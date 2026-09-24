@@ -1,0 +1,1150 @@
+[General comments]
+Good morning.
+Have a nice day.
+Hello.
+Goodbye.
+Thank you.
+Excuse me.
+Please.
+You look great.
+You look sad.
+You look tired.
+Ouch!
+Watch out.
+Ooops!
+I'm sorry.
+See you later.
+Hi.
+Just a minute.
+Pardon me.
+Fine, how are you.
+Goodnight.
+What's up/what's new?
+How are you doing?
+How's it going?
+No, thanks.
+You're welcome.
+
+[Social Comments]
+My name is [***].
+What's your name?
+What are you here for?
+What do you think of my artificial voice?
+I can understand you.
+It just takes me longer to answer.
+Don't be afraid to ask me questions.
+Can you understand me OK?
+Tell me about yourself.
+Where do you work?
+Where do you live?
+Where are you going?
+What have you been up to?
+Did you have a good weekend?
+
+[Questions]
+Where is 
+Who was that?
+How long will you be gone?
+Whose is that?
+What is next?
+What time is it?
+Where is the restroom?
+Where are you going?
+What are you looking for?
+Who are your looking for?
+What is the definition of 
+Show me.
+What's for lunch?
+What's for breakfast?
+What's for dinner?
+When do we go?
+When do we eat?
+How is the weather?
+What is that?
+Where did that come from?
+Why are you here?
+What's happening now?
+
+[Assertive]
+Can you hear me?
+Can you please write it down for me?
+Can I please use pen and paper?
+Can you please explain again?
+I am not a child.
+I'm an adult. Treat me like one.
+Talk to me, not my assistant.
+I need you to take me seriously.
+Let me decide.
+Let me finish.
+I don't want that.
+I don't feel well.
+I have a problem.
+Please say that a different way.
+Please stop and listen.
+I am speech impaired and need this device to help me communicate. Please respect my need to keep and use it.
+I don't like that.
+Stop it!
+You put me in danger.
+What are my other options?
+What happens if I do nothing?
+How long will it take to take effect?
+How long will I need to do that?
+That's not what I meant.
+You are going too fast. Please slow down.
+Don't want to talk about that.
+That hurts my brain.
+Don't touch me.
+Don't patronize me.
+Don't touch my device.
+Don't read my screen.
+I want a second opinion.
+I'd like to speak with an SLP.
+I'd like to talk to my family.
+I'm not ready to make a decision.
+I'm not going to consent to that.
+I don't have a guardian and I don't need one.
+I'm not willing to do that.
+I can make my own decisions.
+Why do you say that?
+What should I do next?
+How would that affect my care?
+How do I make an appointment with them?
+I'd like to try a different medication.
+The medication is making things worse.
+I'm having side effects.
+It's not getting any better.
+I'm having these symptoms [:Symptoms]
+I'm in pain.
+I'm having psychiatric symptoms.
+I'm having an issue with my [:Body]
+I need a referral to a specialist.
+I've been on this medication before.
+I saw a different doctor about this before.
+That isn't what I've heard from other providers.
+I disagree. Here's what I think.
+I don't understand what you're describing.
+Let's discuss other options.
+I don't think I need that.
+Will it hurt?
+Will it require fasting?
+Will it require blood tests?
+Will it require surgery?
+I'm concerned about the side effects.
+I would rather not do that.
+I'm worried about that.
+I'd need to prepare for that.
+I need you to explain with precise language.
+Tell me exactly what I need to do.
+I'm still paying attention even if I don't look at you.
+Please ask me yes/no questions whenever possible.
+I need a break.
+It's too bright.
+It's too loud.
+Please give me space.
+That isn't accessible for me.
+I don't find that helpful.
+Let me explain what would work for me.
+Please take my access needs seriously.
+Could you tell me who you are again?
+Could you please help me with that?
+It takes me longer to type than to speak.
+I can give you my text relay number.
+I can't use the phone; can you contact me a different way?
+I need someone to walk me there.
+I need your questions to be as specific as possible.
+I'm not sure how to do that.
+I need more detailed instructions on that.
+Thank you.
+That is helpful.
+That would work for me.
+I will do that.
+Now.
+Please.
+Right now!
+Stop!
+
+[Summoners]
+Am I right or wrong?
+Any particular reason?
+Are we still going.
+Are you glad?
+Could I take these with me?
+Did it hurt?
+Did you get my message?
+Didn't it come?
+Do you agree?
+Do you want me to?
+How can I get a hold of you?
+How did I do?
+How did it turn out?
+How do you know.
+How long?
+How much more is there?
+How much will it cost?
+How much?
+How will you know?
+How's that?
+I want to know what it is.
+Is it okay?
+Is she coming?
+Is there anything I can do?
+Isn't that the right thing to do?
+Isn't there any way? Just answer my question.
+Should I take it?
+Tell me how much.
+Tell me what you are doing.
+That doesn't answer my question.
+Was there something else?
+Where are you going?
+What am I doing?
+What are you doing?
+What are you going to do next?
+What are you going to do tonight?
+What are you looking for?
+What are you talking about?
+What are you trying to do?
+What caused it?
+What could possibly happen?
+What did it say?
+What did she say?
+What did you come up with?
+What do I do now?
+What do you have to do?
+What do you think of it?
+What do you want?
+What does that mean?
+What else is on?
+What happened this time?
+What happened to you.
+What happens afterwards?
+What is it?
+What is the next plan.
+What is wrong.
+What kind is it?
+What kind of shows are on?
+What then?
+What was the last time that happened?
+What were they?
+What's going on.
+What's that.
+What's that doing in here?
+What's that?
+What's the score?
+What's this one for.
+When will I see you next?
+Where are they?
+Where can I get it?
+Where do I go.
+Where is everyone?
+Where is it?
+Where were you?
+Which one is it?
+Who called.
+Why are you concerned?
+Why did they go to all that trouble?
+Why did you get so many?
+Why don't you go.
+Why won't you be there?
+Will I be able to get another one?
+Will it hurt?
+Will you be here.
+Would you?
+You don't mind?
+You really believe that?
+
+[Time]
+A little more often.
+A long time ago.
+About a week.
+All the time.
+Any minute now.
+Are we finished yet?
+As fast as I can.
+As soon as possible.
+At lunch.
+Before dinner.
+Before I go.
+Before I go on.
+Before you go.
+Can I give you my final decision later?
+Can you do it real quick?
+Come back later.
+Didn't you do it yesterday?
+Don't bother about that right now.
+Either today or tomorrow.
+For a while.
+For good.
+Get me up earlier.
+Give me a few minutes.
+How fast can you do it?
+How fast?
+How long ago?
+How long did it take?
+How long do you think it will be?
+How long does it take?
+How long will it take?
+How often can I get it?
+How often do you do this?
+I already did.
+I am ready.
+I came early.
+I can't wait that long.
+I didn't get it done.
+I haven't yet.
+I might check that out tomorrow.
+I remember the last time I did that.
+I still have time.
+I still haven't eaten yet.
+I used to.
+I want it to be over.
+I want to hurry up.
+I was on time.
+I'll be right back.
+I'll be waiting.
+I'll do that now.
+I'll wait.
+I'm all done.
+I'm almost finished.
+I'm finished.
+I'm finished for tonight.
+I'm waiting for it.
+If there is time.
+If time allows.
+It doesn't seem fast enough.
+It happened again.
+It happens every so often.
+It is time to leave.
+It isn't the first time.
+It takes time.
+It will be a while.
+It won't be forever.
+It would take forever.
+It's about time.
+It's time for the show.
+Just for a short while.
+Late at night.
+Maybe later.
+Maybe tomorrow.
+Most of the time.
+No longer.
+Not anymore.
+Not now.
+Not quite yet.
+Now it is.
+Once again.
+Once in a blue moon.
+Once in a while.
+Once or twice.
+Over and over again.
+Please hurry up.
+Sooner or later.
+The last time.
+Then what after this?
+There's not enough time.
+Tomorrow morning.
+Too early for me.
+Wait a minute.
+Wait for the rest of them.
+Wait until tomorrow.
+We have to wait.
+We will do it tomorrow.
+We will get to that later.
+What time am I going?
+What time do you think?
+What time is it?
+What time tomorrow?
+What time will you be home?
+What time would I be done?
+What time?
+What took you so long?
+When I feel like it.
+When I get done.
+When I want to.
+When I'm ready.
+When is it scheduled?
+When it all took place.
+When we get back.
+When you are here.
+When you come back.
+Why not do it right away?
+You better hurry.
+.
+[Hospital assistance]
+suction.
+pain.
+change position.
+bed.
+chair.
+up.
+down.
+left.
+right.
+turn.
+wipe.
+bedpan.
+urinal.
+medicine.
+call family.
+call nurse.
+
+[Body]
+leg.
+arm.
+head.
+stomach.
+foot.
+back.
+
+[Physical state]
+i'm hot.
+i'm cold.
+i'm hungry.
+i'm thirsty.
+
+[Feelings]
+i'm angry.
+i'm tired.
+i'm sick.
+i'm OK.
+i'm good.
+i'm better.
+i'm worse.
+i'm mad.
+i'm fed up.
+i'm lonely.
+i'm worried.
+
+[Start conversation]
+What do you think about 
+Tell me about 
+I've been thinking about 
+Did you know that 
+Did you see 
+I would like to 
+I think that 
+I've been meaning to tell you 
+By the way 
+I'd rather 
+Someday I want to 
+
+[Continue conversation]
+And then
+Keep going
+Right.
+Oh yeah.
+
+[Feedback]
+I agree.
+That's right.
+I don't doubt that.
+I'm sure that's right.
+You're right about that.
+You're kidding.
+I don't agree.
+Do you really think so?
+I don't think so.
+I doubt that.
+I'm not so sure.
+Who said so?
+You're wrong about that.
+How do you know?
+You missed the boat.
+
+[Communication repair]
+What do you mean?
+You misunderstood.
+Wait, let me rephrase that.
+No, I meant something else.
+I don't understand.
+Excuse me for interrupting.
+Just a minute, let me think about that.
+That's not what I meant.
+No, no, no.
+What did you say?
+Say that again, I missed it.
+I get it.
+I don't get it.
+Who are you talking about?
+Huh?
+Ah, now I see.
+I'm going to start over.
+.
+[(Dis)agreements]
+I agree.
+That's right.
+I don't doubt that.
+I'm sure that's right.
+You're right about that.
+You're kidding.
+I don't agree.
+Do you really think so?
+I doubt that.
+I'm not so sure.
+Who said so?
+You're wrong about that.
+How do you know?
+I don't think so.
+That's true.
+That's a possibility.
+
+[Request]
+Accept my decision.
+Are you coming?
+Are you excited?
+As careful as you can.
+Be very very careful.
+Can I do this?
+Can I get a new one?
+Can I try one?
+Can I use it?
+Check if its right.
+Could I have some?
+Do it.
+Do you have time to play?
+Do you mind.
+Don't complain.
+Don't do that again.
+Don't mess with it.
+Guess what I want?
+Help me out.
+How about it?
+How many more?
+How would you feel? 
+I need help now.
+I need it.
+I wonder if I could get a new one.
+I would like you to see.
+I'd like to see it.
+I'll show you what I want.
+Let me.
+Let me go.
+Let me see it.
+Let's do it.
+Let's go.
+Let's play.
+Listen to that.
+Please find out.
+Please get me some.
+Please get out of here.
+So why don't we do that.
+Someone help me.
+This is a request.
+Turn it over.
+Watch out.
+We have to stop.
+We ought to try that.
+When you find out let me know.
+Why don't we do that?
+Why don't you give it to me?
+Why don't you put that away?
+Will you do me a favour?
+Would you come? Would you do it?
+You could help a little.
+You'd better come.
+
+[Responses]
+Anything's possible.
+Are you crazy?
+Are you serious?
+As far as I'm concerned.
+As much as I can.
+As usual.
+Beats me.
+Believe me it is.
+Blows that theory all to hell.
+Boy do I ever know.
+Can you beat that?
+Come to think about it.
+Don't encourage him.
+Don't make me laugh.
+Don't mess me up.
+Don't worry about it.
+Easy for you to say.
+For all I know.
+Forget about it.
+Give me a break.
+Good idea.
+Have a heart.
+Hey man, you've got a lot of gusts.
+Honest to goodness.
+How about that.
+How could I be mad at you?
+How did you know?
+How do they know.
+I always do.
+I believe it.
+I can handle it.
+I can't.
+I can't answer.
+I can't believe it.
+I can't figure that out.
+I can't help it.
+I can't remember.
+I can't remember anything else.
+I can't tell.
+I can't think of anything.
+I can't understand.
+I certainly did.
+I certainly don't mind.
+I could probably do better.
+I didn't know.
+I didn't realize that.
+I didn't say anything.
+I didn't say it was true.
+I do not have any idea.
+I don't either.
+I don't have any.
+I don't have any idea.
+I don't have much choice.
+I don't have to.
+I don't know.
+I don't know about you.
+I don't know how.
+I don't know which one.
+I don't need it.
+I don't need it anymore.
+I don't really know how.
+I don't really need it.
+I don't really remember.
+I don't think so.
+I don't understand it either.
+I don't want anything.
+I don't want that.
+I don't want to.
+I don't' mean like that.
+I don't' want it.
+I doubt it.
+I forgot.
+I found it.
+I gave my final word.
+I guarantee it.
+I guess.
+I guess not.
+I guess so.
+I hadn't even thought about it.
+I have no idea.
+I haven't noticed any difference.
+I haven't yet.
+I hear you.
+I hope it is.
+I just don't feel like it.
+I just don't think that's true.
+I know.
+I know it.
+I know it's important.
+I know that.
+I know what you mean.
+I know, I don't need to be reminded.
+I promise.
+I really do.
+I really feel I can't do it.
+I really think its long enough.
+I really try.
+I said I was.
+I still have to.
+I suppose so.
+I sure hope so.
+I think it's only fair.
+I think not.
+I think that is unnecessary.
+I think we ought to do that.
+I thought it would be good for me.
+I thought I was through.
+I thought so.
+I thought you were going to.
+I told you.
+I told you I don't know.
+I trust you.
+I understand.
+I understand that.
+I was going to.
+I was supposed to.
+I was trying to tell you I will.
+I will still need it.
+I will try harder.
+I wish I knew what happened.
+I wish them luck.
+I won.
+I won't do that.
+I won't guarantee anything.
+I won't let him.
+I wonder.
+I'll ask him.
+I'll check.
+I'll come back.
+I'll deal with it.
+I'll decide later.
+I'll keep an eye on that for you.
+I'll plan on it.
+I'll try.
+I'm afraid I can't change that.
+I'm afraid so.
+I'm doing it anyway.
+I'm game for trying that I'm just making a comment.
+I'm not a child.
+I'm not even sure I want the answers.
+I'm not going anywhere.
+I'm not talking about that.
+I'm not trying to put it off.
+I'm probably going to be sorry.
+I'm still thinking about it.
+I'm supposed to.
+I'm supposed to have.
+I'm sure.
+I've been told.
+I've got no idea.
+I've heard of that.
+If I could I would.
+If you want to.
+Is there any doubt?
+Is there something wrong with that.
+It certainly did.
+It could have been.
+It depends.
+It didn't turn out that way.
+It doesn't matter.
+It has to be.
+It just seems to always happen like that.
+It might work.
+It might work out.
+It really helps.
+It's completely different It's the truth.
+It's up to you.
+Just fine.
+Just looking.
+Kiss my grits.
+Let's not go into that again.
+Let's not take it to extreme limits.
+Let's try again.
+Let's try it.
+Looks like it.
+Makes you wonder.
+Maybe they do.
+"Maybe, maybe not" Never mind.
+Never you mind.
+No joke.
+No way.
+No, I'm not.
+Nobody told me that.
+not much at all.
+Not usually but in this case.
+Of course.
+Of course I do.
+Oh darn.
+Oh my God.
+Okay gorgeous.
+One never knows.
+Please stop nagging.
+She didn't give me that impression.
+So is mine.
+So that's the way it is.
+So what?
+Something like that.
+Sure I am.
+Thank God.
+Thank the Lord for small favours.
+That depends.
+That didn't work.
+That does the trick.
+That is interesting.
+That won't make a difference.
+That's a deal.
+That's all.
+That's an idea.
+That's enough.
+That's got nothing to do with it.
+That's it.
+That's my choice.
+That's my problem.
+That's not right.
+That's not the way it works.
+That's okay.
+That's right.
+That's the last resort.
+That's the truth.
+That's the way its always been.
+That's why.
+There is nothing I can do about it.
+There used to be.
+There was something else.
+There's got to be a better way.
+There's got to be another.
+There's no way in the world.
+There's nothing more.
+They do the strangest things.
+They told me that They usually do.
+This is anticipated.
+This is different.
+Unfortunately, yes.
+Want to bet?
+Well it sure feels like it.
+Well it sure looks like it.
+Well, I wouldn't know about that.
+What an idea.
+What else am I going to do?
+What luck.
+What other choice do I have?
+Why not.
+Yes, I was.
+Yes, I can.
+Yes, I can do that.
+Yes, you can.
+You are kidding.
+You bet your britches.
+You better not.
+You can come up with something better.
+You can give it to me.
+You can say that again.
+You can try but I doubt it.
+You could not possibly understand.
+You know how it goes.
+You know they do.
+You never know.
+You said you'd try.
+You should have told me.
+You shouldn't have.
+You're not supposed to.
+You've go to be nuts.
+You've got to be kidding.
+What can I do?
+
+[Equipment]
+It doesn't work properly.
+I don't know what happened to it.
+I got the same kind of trouble.
+It doesn't work.
+It just doesn't work.
+It works once in a while.
+Rewind the tape please.
+Turn it down a little bit please.
+Turn it off.
+
+[Control Phrases]
+All I'm trying to say is.
+As I was saying.
+Boy, I'm glad you called.
+But guess what.
+Can I talk to you?
+Change the subject.
+Could you repeat what you said.
+Did you understand?
+Didn't you know that?
+Do you know what he did?
+Do you understand what I mean?
+Explain that to me.
+Guess what I've got.
+Haven't I met you before?
+How about you?
+How are things going for you?
+How come?
+I don't understand your question.
+I don't want to interrupt.
+I forgot to mention.
+I have a great idea.
+I have news.
+I have to go.
+I just remembered.
+I know why.
+I need to explain.
+I really like to talk about it.
+I should explain.
+I want to know.
+I want to show you something.
+I want to talk to you about.
+I was just curious.
+I was just wondering.
+I was saying.
+I will see you I'd better get going.
+I'd better go.
+I'll have to think of a few more questions.
+I'll let you know I'll see you around.
+I'm curious about.
+I'm really glad you dropped by.
+I've got an idea Is it a deal?
+Is that okay?
+Just one comment.
+Just one more thing.
+Let me answer.
+Let me tell you.
+Let me tell you about it.
+Let me tell you what I did.
+Let me tell you why.
+Let's see now.
+Listen to me.
+Over and out.
+Please don't interrupt.
+See you later.
+Tell me about it.
+Thanks for telling me.
+That's all I have to say.
+That's all that's happening.
+there was something else I was going to ask you.
+What are you going to do today?
+What are you talking about?
+What are you trying to tell me?
+What did she say?
+What do you think.
+What do you think about that?
+What happened?
+What is it now?
+What were you about to tell me?
+What's up?
+What's wrong?
+Will I see you later?
+You are not going to believe this.
+You don't have to go.
+You know something?
+You know what I don't understand.
+You know what I think.
+Come right back please.
+Let me tell you why I was upset.
+
+[Location]
+Do you know where I am going home.
+I don't have to go.
+I don't know where it is.
+I go the opposite way.
+I had to go back.
+I may not even go back.
+I think I'm ready to go back to bed.
+I want to go.
+I want to stay.
+I'll meet you there.
+I'm going back.
+In my room.
+Is he gone?
+Put that here.
+side by side.
+There's more over there.
+We are going.
+Where is it?
+Where should I go.
+
+[Opinion]
+A little better.
+A rather refreshing outlook.
+Absolutely ridiculous.
+Boy, I'm glad.
+Boy, that feels good.
+Exceedingly good.
+He can do it.
+I am getting it.
+I blew it.
+I can't figure it out.
+I can't stand it.
+I did okay.
+I didn't mind.
+I didn't really want one.
+I disagree.
+I don't believe it.
+I don't care.
+I don't feel good.
+I don't feel like seeing anybody.
+I don't like it.
+I don't like it anymore.
+I don't like to.
+I don't really care.
+I don't really like it very well.
+I don't remember it being all that hard.
+I don't understand what's going on.
+I enjoyed myself.
+I feel sorry about that.
+I feel the same way about it.
+I felt like a lot.
+I get cranky.
+I get scared to death.
+I had a great day.
+I had a great time.
+I hate it.
+I honestly don't want to do it.
+I hope you're not disappointed.
+I like it better.
+I love it.
+I need it.
+I noticed it.
+I really feel bad.
+I really get off on it.
+I really like it.
+I think he's kind of cute.
+I think that I've had enough.
+I think this is pretty good.
+I was doing excellent.
+I was so glad.
+I'd like to do it.
+I'll get used to it.
+I'm concerned about it.
+I'm doing well.
+I'm embarrassed.
+I'm feeling a little better.
+I'm getting sick of it.
+I'm glad.
+I'm glad that is done.
+I'm going to do the impossible.
+I'm just getting it from all sides.
+I'm nervous.
+I'm not anxious to take any.
+I'm not going to take it.
+I'm not mad at you.
+I'm really disappointed.
+I'm really having a hard time.
+I'm really worried about it.
+I'm so excited.
+I'm still not hungry.
+I'm too rushed.
+I'm very hot.
+I'm very sleepy.
+I've had it.
+It doesn't make any difference.
+It feels good.
+It feels great.
+It frustrates me.
+It happens to be my favourite.
+It is absolutely ridiculous.
+It is different alright.
+It is just your imagination.
+It is very important.
+It shook me up no end.
+It sounds confusing.
+It sounds good.
+It sounds good to It still hurts.
+It suddenly becomes important.
+It was no good.
+It was wrong.
+It would be much easier.
+It's amazing.
+It's slightly obvious.
+It's so bad.
+It's such a hassle It's too bad.
+It's weird.
+It's wonderful.
+Its got me bothered now.
+Its not important Just great.
+Just plain good.
+Look out world here I come.
+Makes me mad.
+Nobody seems to understand.
+Pretty ugly huh?
+That hurts.
+That is amazing.
+That isn't fair.
+That makes me laugh.
+That should be hard to do.
+That will be fun.
+That would be great.
+That's all right.
+That's easy.
+That's logical.
+That's my problem.
+That's pretty good.
+That's what I like.
+That's why I feel the way I do.
+That's wonderful.
+Too much for me.
+What a jerk.
+What a turkey.
+When I am tired.
+You will love it.
+I don't honestly even know what's wrong.
+I was so disappointed.
+Kind of tired.
+It's not my cup of tea.
+
+[Assistance]
+Can you help me, please?
+Hand me that, please.
+Let me see that.
+Would you help me with my coat?
+Help me move this.
+Bring that over here.
+Please turn that on for me.
+Please turn that off for me.
+May I have something to drink?
+May I have something to eat?
+Would you make a phone call for me?
+Help me put this on.
+
+[Social]
+May I go with you?
+Come talk with me.
+Would you like to go with me?
+Sit over here with me.
+I'm sorry, but I have an appointment now.
+You'll have to go.
+Leave me alone.
+I want a hug.
+I want a kiss.
+Anything I can do?
+Are you sure you don't mind?
+Can I help?
+Excuse me.
+Hey good looking.
+Hi how are things going?
+How are you?
+How dare you.
+How do you feel?
+I didn't mean it.
+I didn't mean to.
+I don't mean to cause trouble.
+I goofed.
+I hope you feel better.
+I missed you I think you're wonderful.
+I want to thank you.
+I was just kidding.
+I was only joking.
+I'm glad you're here I'm sorry.
+If you don't mind.
+It's good to see you.
+Loosen up.
+Much obliged.
+Pardon me.
+Please sit down.
+Pretty please.
+Sorry to keep popping off.
+Thank you anyway.
+Thank you very much.
+Thanks a lot.
+Thanks a lot, it really helps.
+That helped tremendously.
+Wish me luck.
+You helped a lot.
+You're so nice.
+
+[Humorous]
+Is that your real voice?
+That's easy for you to say.
+Who programmed this voice machine?
+That was the voice machine talking, not me.
+Sssss, I was trying to whistle.
+
+[Slang]
+You wanna bet.
+That's crazy.
+Bummer.
+It's the pits.
+Bug off.
+Bummed out.
+Get off my case.
+Quit your bitchin'.
+Tough toenails.
+Go jump in the lake.
+You're pulling my leg.
+You're kidding.
+You better believe it.
+Sit on it.
+What a joke.
+
+[Idioms]
+Just like a dream.
+Off the deep end.
+Out of the clear blue.
+Practice makes perfect.
+It's not my cup of tea.
+Once in a blue moon.
+
+[Symptoms]
+headache
+stomach ache
+tooth ache
+swollen glands
+flu
+shivering

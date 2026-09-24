@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TexCom Help</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Opened inside TexCom (Settings > Help) in a panel with a Close button; also works on its own. -->
+    <style>
+        :root { --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #475569; --accent: #1d4ed8; --border: #cbd5e1; --kbd: #e2e8f0; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #cbd5e1; --accent: #93c5fd; --border: #334155; --kbd: #334155; }
+        }
+        html { -webkit-text-size-adjust: 100%; }
+        body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; } /* read-only help: taps shouldn't select words */
+        body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        main { max-width: 760px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); }
+        h1 { font-size: 28px; margin: 8px 0 4px; }
+        .intro { color: var(--muted); margin: 0 0 16px; }
+        nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+        nav a { display: inline-block; padding: 8px 12px; min-height: 28px; border: 1px solid var(--border); border-radius: 999px; color: var(--accent); text-decoration: none; background: var(--card); font-size: 16px; }
+        section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px 18px 12px; margin: 0 0 16px; }
+        h2 { font-size: 22px; margin: 14px 0 6px; }
+        h3 { font-size: 18px; margin: 12px 0 4px; }
+        ul { padding-left: 1.2em; margin: 6px 0; }
+        li { margin: 4px 0; }
+        dl { margin: 6px 0; display: grid; grid-template-columns: 2.4em 1fr; gap: 6px 10px; align-items: baseline; }
+        dt { font-size: 22px; text-align: center; }
+        dd { margin: 0; }
+        .kbd { background: var(--kbd); padding: 1px 7px; border-radius: 5px; font-family: ui-monospace, Menlo, monospace; font-size: 0.9em; }
+        .note { color: var(--muted); font-size: 16px; }
+        .apps-only { display: inline-block; font-size: 14px; border: 1px solid var(--border); border-radius: 6px; padding: 0 6px; margin-left: 6px; color: var(--muted); vertical-align: middle; }
+        #no-ai { display: none; border-left: 4px solid #b45309; background: var(--card); padding: 10px 14px; margin: 0 0 16px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>TexCom Help</h1>
+    <p class="intro">TexCom helps you talk by typing or by choosing ready-made phrases, and it speaks them aloud.</p>
+
+    <p id="no-ai">You're using TexCom in a web browser. Everything here works except the features marked <span class="apps-only">apps only</span>, which need the TexCom app for iPhone, iPad or Mac.</p>
+
+    <nav aria-label="Topics">
+        <a href="#speaking">Speaking</a>
+        <a href="#toolbar">Toolbar</a>
+        <a href="#phrases">Phrases</a>
+        <a href="#editing">Editing</a>
+        <a href="#conversation">Talking with someone</a>
+        <a href="#ai">Smart AI</a>
+        <a href="#settings">Settings</a>
+        <a href="#yourphrases">Your phrases are safe</a>
+    </nav>
+
+    <section id="speaking">
+        <h2>Speaking</h2>
+        <ul>
+            <li><strong>Type</strong> in the yellow box, then press <strong>Speak</strong>.</li>
+            <li><strong>Tap a phrase</strong> to add it to the box, then press Speak. You can add several phrases, or type more around them.</li>
+            <li>Some phrases are set to <strong>speak straight away</strong> when you tap them ("Instant message", see <a href="#editing">Editing</a>).</li>
+            <li><strong>The text box is also the search.</strong> As you type, the list shows phrases containing the words since your last full stop, comma, question mark (and so on). Tap one and it replaces those words. For example, type <span class="kbd">I'm tired. tea</span> and tap "It's not my cup of tea." A <strong>Matching</strong> line shows while the list is filtered; tap its ✕ to see every phrase again.</li>
+            <li><strong>Shortcuts:</strong> type a phrase's shortcut followed by <span class="kbd">/</span> and it becomes the whole phrase. For example, if "Hello" has the shortcut <span class="kbd">h</span>, typing <span class="kbd">h/</span> gives "Hello".</li>
+            <li>A phrase containing <span class="kbd">[***]</span> puts in your name (Settings &gt; Your name).</li>
+        </ul>
+    </section>
+
+    <section id="toolbar">
+        <h2>The toolbar</h2>
+        <p class="note">On a narrow screen some buttons move into the <strong>⋯</strong> menu at the end of the toolbar.</p>
+        <dl>
+            <dt aria-hidden="true">🗑</dt><dd><strong>Clear</strong> the text box (and the chat history).</dd>
+            <dt aria-hidden="true">↶ ↷</dt><dd><strong>Undo</strong> and <strong>Redo</strong> changes to the text box.</dd>
+            <dt aria-hidden="true">🎙</dt><dd><strong>Listen to your partner</strong>: turns the microphone on or off (red when listening). <span class="apps-only">apps only</span></dd>
+            <dt aria-hidden="true">🔔</dt><dd><strong>Alert</strong>: rings a bell to get someone's attention.</dd>
+            <dt aria-hidden="true">✕ ✓</dt><dd><strong>No</strong> and <strong>Yes</strong>: say "No" or "Yes" straight away.</dd>
+            <dt aria-hidden="true">SOS</dt><dd><strong>SOS</strong>: beeps S-O-S in Morse code to call for help.</dd>
+            <dt aria-hidden="true">♡</dt><dd><strong>Favourite</strong>: adds what's in the text box to your Favourites.</dd>
+            <dt aria-hidden="true">✎</dt><dd><strong>Edit</strong>: turns Edit mode on and off (see <a href="#editing">Editing</a>).</dd>
+            <dt aria-hidden="true">⚙</dt><dd><strong>Settings</strong>, where you'll also find this Help.</dd>
+            <dt aria-hidden="true">⤴</dt><dd><strong>Share</strong> the text in the box (for example in a message).</dd>
+        </dl>
+    </section>
+
+    <section id="phrases">
+        <h2>Phrases and categories</h2>
+        <ul>
+            <li>Phrases are grouped into <strong>categories</strong>. Tap a category to see its phrases; <strong>All</strong> shows every phrase.</li>
+            <li>On a phone held upright, tap <strong>Categories</strong> above the phrases to choose one.</li>
+            <li><strong>Favourites</strong> holds the phrases you use most. Add one with the ♡ button, or tick Favourites when editing a phrase.</li>
+            <li>Swipe (or scroll) the lists to see more.</li>
+            <li>On a larger screen, drag the bar between the two columns to make either wider.</li>
+        </ul>
+    </section>
+
+    <section id="editing">
+        <h2>Adding and changing phrases</h2>
+        <ul>
+            <li>Press <strong>✎ Edit</strong>. Each phrase and category gets a ✎ button, and "+ Add phrase" / "+ Add category" appear at the top of the lists.</li>
+            <li>In the editor you can change the <strong>words</strong>, the <strong>symbol</strong> (type or paste an emoji), a <strong>shortcut</strong>, and which <strong>categories</strong> it's in.</li>
+            <li><strong>Instant message</strong>: the phrase speaks as soon as you tap it.</li>
+            <li><strong>Delete</strong> removes it (you'll be asked to confirm).</li>
+            <li>In Edit mode, drag the ⠿ handle to <strong>reorder</strong> phrases or categories.</li>
+            <li>Press ✎ Edit again when you've finished.</li>
+        </ul>
+    </section>
+
+    <section id="conversation">
+        <h2>Talking with someone</h2>
+        <h3>Face to face</h3>
+        <ul>
+            <li>Press <strong>🎙</strong> and TexCom listens to the person you're talking with. What they say appears at the top of the screen, and TexCom can suggest replies. <span class="apps-only">apps only</span></li>
+            <li>Settings &gt; Smart AI &gt; <strong>Start listening when TexCom opens</strong> turns the microphone on each time you start TexCom.</li>
+            <li>With a keyboard connected, the other person can press the <span class="kbd">`</span> key (next to 1 or Z), type, and press <span class="kbd">Enter</span>. Their words appear at the top of the screen. <span class="kbd">Esc</span> cancels.</li>
+        </ul>
+        <h3>On their own phone or computer, anywhere</h3>
+        <ul>
+            <li>Settings &gt; Conversation &gt; <strong>Start a conversation…</strong> gives you a <strong>link</strong> and a short <strong>code</strong>. Share the link (in a message or email), or let them scan the QR code.</li>
+            <li>They can use any phone or computer (they just open the link), or their own TexCom (<strong>Join a conversation…</strong>, then paste the link or type the code).</li>
+            <li>When they try to join, TexCom asks you: <strong>Allow</strong> or <strong>Decline</strong>. Nobody joins without your say-so. Each conversation has a new link.</li>
+            <li>What you say appears very large on their screen. What they type appears in your <strong>chat history</strong>.</li>
+            <li>The bar above the chat shows who you're talking with. Press <strong>End</strong> to finish.</li>
+            <li><strong>Read partner's messages aloud</strong> (Settings &gt; Conversation) speaks their messages to you.</li>
+            <li>Both of you need an internet connection.</li>
+        </ul>
+        <h3>Chat history</h3>
+        <ul>
+            <li>Settings &gt; Smart AI &gt; <strong>Show chat history</strong> shows the conversation so far, under the categories (or above the phrases on a phone held upright). It always shows during a conversation over the internet.</li>
+            <li>Drag the bar above it to make it bigger or smaller.</li>
+        </ul>
+    </section>
+
+    <section id="ai">
+        <h2>Smart AI <span class="apps-only">apps only</span></h2>
+        <p>These run privately on your device (Apple Intelligence), so nothing you say is sent anywhere. They need a recent iPhone, iPad or Mac.</p>
+        <ul>
+            <li><strong>Suggested replies</strong>: after you or your partner speak, up to three replies appear at the top of the phrase list, marked 🧠. Tap one to use it. Type <span class="kbd">^</span> to ask for new suggestions.</li>
+            <li><strong>Next-word predictions</strong>: as you type, likely next words appear as buttons. Tap one to add it.</li>
+            <li><strong>Smart Expand</strong>: type a short note and end it with <span class="kbd">@</span> (for example <span class="kbd">need drink@</span>) and TexCom writes it out as a full sentence. Switch it on in Settings &gt; Smart AI.</li>
+            <li><strong>AI persona</strong> (Settings &gt; Smart AI &gt; Edit AI persona…): tell the AI about you, such as your tone, pronouns, how to talk about your communication aid, and anything else it should know, so suggestions sound like you.</li>
+        </ul>
+    </section>
+
+    <section id="settings">
+        <h2>Settings</h2>
+        <ul>
+            <li><strong>Your name</strong> and <strong>theme</strong> (colours).</li>
+            <li><strong>Speech</strong>: choose the voice, pitch, speed and volume, and press <strong>Test voice</strong> to hear it.</li>
+            <li><strong>Conversation</strong> and <strong>Smart AI</strong>: see above.</li>
+            <li><strong>Data</strong>: import phrases from a text file, open or save a phrase set, or share it.</li>
+        </ul>
+    </section>
+
+    <section id="yourphrases">
+        <h2>Your phrases are safe</h2>
+        <ul>
+            <li>Updating TexCom <strong>never changes or removes your phrases</strong>, categories or settings.</li>
+            <li>When an update brings new phrases, TexCom tells you once, and Settings &gt; Data shows <strong>Add new TexCom phrases…</strong>. They go into a <strong>New phrases</strong> category for you to look through. Keep the ones you like and delete the rest.</li>
+            <li>To keep a copy, or move your phrases to another device, use Settings &gt; Data &gt; <strong>Save phrase set…</strong> and <strong>Open phrase set…</strong>.</li>
+        </ul>
+    </section>
+</main>
+<script>
+    // Opened from the web version (no on-device AI): explain which parts need the apps
+    if (new URLSearchParams(location.search).get('hasAI') === 'false') document.getElementById('no-ai').style.display = 'block';
+    // Inside TexCom's help panel: Escape closes it
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && window.parent !== window) window.parent.postMessage('texcom-close-help', '*'); });
+</script>
+</body>
+</html>

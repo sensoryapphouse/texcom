@@ -1,0 +1,853 @@
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    margin: 0;
+    top: 0vh;
+    justify-content: center;
+    -webkit-user-select: none;
+    background-color: var(--bg-main, aliceblue); color: var(--btn-text) !important;
+}
+splash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0vh;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background: url(images/splash.jpg);
+    background-size: 100vw 100vh;
+    background-color: black;
+    opacity: 1.0;
+    z-index: 10001;
+    -webkit-app-region: no-drag;
+}
+
+startSplash {
+    position: absolute;
+    top: 70vh;
+    left: 75vw;
+    width: 15vw;
+    height: 15vw;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: url(images/start.png);
+    background-size: 15vw 15vw;
+    z-index: 10005;
+    opacity: .8;
+    -webkit-app-region: no-drag;
+}
+
+startSplash:hover {
+    opacity: 1.0;
+}
+
+startSplash:active {
+    opacity: 0.2;
+}
+
+helpSplash {
+    position: absolute;
+    left: 2.5vw;
+    top: 2.5vw;
+    width: 10vw;
+    height: 10vw;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: url(images/help.svg);
+    background-size: 10vw 10vw;
+    z-index: 10005;
+    opacity: .8;
+    -webkit-app-region: no-drag;
+}
+
+    helpSplash:hover {
+        opacity: 1.0;
+    }
+
+    helpSplash:active {
+        opacity: 0.2;
+    }
+        
+    #gui_container { position: absolute; right: 0; top: 5.5vh; z-index: 10000; transform-origin: top right; }
+
+#gui {
+    position: absolute;
+    top: 7vh;
+    left: 4vw;
+    height: 80vh;
+    opacity: 1;
+}
+
+buttonPanel {
+    position: absolute;
+    top: 7vh;
+    left: 4vw;
+    height: 62vh;
+    width: 92vw;
+    background-color: var(--bg-main, aliceblue); color: var(--btn-text) !important;
+    opacity: 1;
+    /*    z-index: 900;*/
+    border: solid;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#theText {
+    
+    box-sizing: border-box;
+    
+    
+    
+    height: 16vh;
+    /*    */
+    background-color: var(--text-box-bg, lightgoldenrodyellow); color: var(--btn-text) !important;
+    /*    padding: 10px;*/
+    border: solid var(--text-box-border, blue);
+    overflow-y: auto;
+    border-
+    border-radius: 0vh;
+    font-size: 4vh;
+    resize: none;
+}
+
+#flip {
+    position: absolute;
+    top: 0h;
+    left: 0vw;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--text-box-bg, lightgoldenrodyellow); color: var(--btn-text) !important;
+    border: none;
+    overflow-y: auto;
+    font-size: 10vh;
+    vertical-align: middle;
+    text-align: center !important;
+    padding-top: 10vh;
+    z-index: 9000;
+}
+
+#theCategories {
+    
+    
+    
+    
+    height: 3.6vh;
+    line-height: 3.5vh;
+    text-align: center;
+    
+    padding: .25h;
+    /*    border: 2px solid black;*/
+    /*    border-*/
+    /*    border-bottom: 1px solid blue;*/
+    box-sizing: border-box;
+    font-size: 2.5vh;
+    /*    z-index: 600;*/
+}
+
+#the-filter {
+    
+    /*    box-sizing: border-box;*/
+    /*    border-radius: 0;*/
+    
+    
+    
+    height: 4vh;
+    line-height: 4vh;
+    
+    
+    /*    border: 1px solid skyblue;*/
+    font-size: 2.5vh;
+    padding: .3vh;
+    
+}
+
+/* (B) LIST */
+#categoryList {
+    flex: 1;
+    height: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    border: 0px solid skyblue;
+    border-radius: 0vh;
+}
+
+
+#categoryList li.hide {
+    display: none;
+}
+
+#messagesList {
+    flex: 1;
+    height: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    border: 0px solid skyblue;
+    border-radius: 0vh;
+}
+
+/* Categories and phrases share one row style.
+   Stays display:block - the tap handlers read li.innerText, which a flex row would change. */
+#categoryList li, #messagesList li {
+    display: block;
+    padding: 0.45em 0.6em;
+    font-size: var(--ui-font);
+    line-height: 1.25;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-main) !important;
+    color: var(--btn-text) !important;
+}
+/* Emoji (inline-sized by the JS) at a fixed ratio to the text */
+#categoryList li > span:first-child, #messagesList li > span:first-child {
+    font-size: var(--ui-emoji) !important;
+    line-height: 1;
+    vertical-align: middle;
+    margin-right: 0.3em;
+}
+#categoryList li .quick, #messagesList li .quick {
+    line-height: var(--ui-emoji);
+}
+#categoryList li:hover, #messagesList li:hover {
+    background-color: var(--btn-hover) !important;
+}
+/* Selected category: normal text on a light tint of the accent plus a thick accent bar
+   (white on the accent colour was only 3.5-4.5:1 in most themes) */
+#categoryList li.selected, #categoryList li.selected:hover {
+    background-color: var(--btn-hover) !important; /* fallback where color-mix isn't supported */
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-main)) !important; /* 10%: keeps Ocean Breeze above 4.5:1 */
+    color: var(--btn-text) !important;
+    font-weight: 700;
+    box-shadow: inset 6px 0 0 var(--accent);
+}
+
+#messagesList li.hide {
+    display: none;
+}
+
+.dg.main.taller-than-window .close-button {
+    border: 1px solid #000000;
+}
+
+.dg.main .close-button {
+    background-color: #e8e8e8;
+}
+
+.dg.main .close-button:hover {
+    background-color: #ddd;
+}
+
+.dg {
+    color: #555;
+    text-shadow: none !important;
+}
+
+.dg.main::-webkit-scrollbar {
+    background: #fafafa;
+}
+
+.dg.main::-webkit-scrollbar-thumb {
+    background: #bbb;
+}
+
+.dg li:not(.folder) {
+    background: #f0f0f0;
+    border: 1px solid #000000;
+}
+
+.dg li.save-row .button {
+    text-shadow: none !important;
+}
+
+.dg li.title {
+    color: white;
+    background: #686898 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;
+}
+
+.dg li.title:hover {
+    color: white;
+    background: #686898 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;
+}
+
+.dg .cr.boolean {
+    border: 1px solid #000000;
+}
+
+.dg .cr.color {
+    border: 1px solid #000000;
+}
+
+/*
+    .dg .cr.function {
+    border-left: 3px solid #C8C8E8;
+    background: #C8C8E8;
+    }
+
+    .dg .cr.function:hover {
+    background: #B8B8D8
+    }
+*/
+
+.dg .cr.function {
+    border: 1px solid #000000;
+    background: #fafafa;
+}
+
+.dg .cr.function:hover {
+    background: #fffed6
+}
+
+.dg .cr.number {
+    border: 1px solid #000000;
+}
+
+.dg .cr.number input[type=text] {
+    border: 1px solid #000000;
+    color: white
+}
+
+.dg .cr.string {
+    border: 1px solid #000000;
+}
+
+.dg .cr.string input[type=text] {
+    border: 1px solid #000000;
+    color: white
+}
+
+.dg .cr.boolean:hover,
+.dg .cr.number:hover,
+.dg .cr.string:hover,
+.dg .cr.color:hover {
+    background: #fffed6;
+}
+
+.dg {
+    font-size: 15px;
+}
+
+.dg .c select {
+    font-size: 14px;
+    text-align: left;
+}
+
+.dg li:not(.folder) {
+    overflow: hidden;
+}
+
+/* dropdown check list */
+.check-list {
+    overflow-y: auto;
+    max-height: 12vh;
+    list-style: none;
+    padding: 0;
+    font-size: 2.25vh;
+    line-height: 5vh;
+}
+
+.rightjustify {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (orientation: portrait), (max-aspect-ratio: 1/1) {
+    startSplash {
+        position: absolute;
+        top: 75vh;
+        left: 67vw;
+        width: 15vh;
+        height: 15vh;
+        border: none;
+        cursor: pointer;
+        background-color: transparent;
+        background-image: url(images/start.png);
+        background-size: 15vh 15vh;
+        z-index: 10005;
+        opacity: .8;
+        -webkit-app-region: no-drag;
+    }
+}
+
+
+/* Slippylist focus */
+.slippylist li:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: -3px;
+    z-index: 1;
+    position: relative;
+}
+
+
+/* STEP 7: OS Keyboard Hardening */
+body.keyboard-active .text-speak-row {
+    height: auto !important;
+    max-height: 12vh !important; /* Lock to ~3 lines max */
+}
+body.keyboard-active #theText {
+    min-height: 9vh !important;
+}
+.layout-one body.keyboard-active #categoryList { /* one column only: two columns keep the left pane */
+    display: none !important; /* Auto-collapse Categories */
+}
+.layout-one body.keyboard-active #chatHistoryContainer, .layout-one body.keyboard-active #chatDivider { /* one column only */
+    display: none !important; /* Auto-collapse Chat History too to save space (the conversation bar stays) */
+}
+body.keyboard-active #messagesList {
+    flex: 1 !important; min-height: 15vh !important; /* Shrink but do not hide Phrase Bank */
+}
+
+/* Everything else that shows text uses the shared base size (several have inline vh sizes, hence !important) */
+#theText { font-size: calc(var(--ui-font) * 1.2) !important; }
+#the-filter, #theCategories, #speakButton span, .ai-predict-btn { font-size: var(--ui-font) !important; }
+
+/* Text box and Speak button share one height: about three lines of text, about two on short screens */
+.text-speak-row {
+    height: min(calc(var(--ui-font) * 1.2 * 1.3 * 3 + 28px), 18vh) !important;
+    align-items: stretch;
+}
+#theText { height: 100% !important; min-height: 0 !important; }
+#speakButton { height: 100% !important; }
+#speakButton svg {
+    width: calc(var(--ui-font) * 1.9) !important;
+    height: calc(var(--ui-font) * 1.9) !important;
+    margin-bottom: 2px !important;
+}
+
+/* Search box: a visible, bordered field on the shared size scale */
+#the-filter {
+    height: auto !important;
+    line-height: 1.3 !important;
+    padding: 0.4em 0.6em !important;
+    border: 1px solid var(--text-box-border) !important;
+    border-radius: var(--btn-radius, 10px) !important;
+    background: var(--text-box-bg);
+    color: var(--btn-text);
+    margin-bottom: var(--ui-gap) !important;
+}
+
+/* Settings: a proper close target, and controls that stay inside the panel */
+.close-settings-btn { min-width: 44px; min-height: 44px; }
+.settings-row { gap: var(--ui-gap); }
+.settings-row > label { flex: 0 1 auto; }
+.settings-row select { min-width: 0; max-width: 60%; }
+/* Settings text on the shared base size (was vh-based, ~8px on a sideways phone) */
+#customSettingsPanel .settings-row, #customSettingsPanel .settings-row select, #customSettingsPanel .settings-row input,
+#customSettingsPanel .settings-action-btn { font-size: var(--ui-font) !important; }
+#customSettingsPanel h3, #customSettingsPanel .settings-section h2 { font-size: calc(var(--ui-font) * 1.05) !important; }
+#customSettingsPanel .settings-header h2 { font-size: calc(var(--ui-font) * 1.4) !important; }
+#customSettingsPanel .close-settings-btn { font-size: calc(var(--ui-font) * 1.3) !important; }
+#aiTooltipIcon { font-size: var(--ui-font) !important; min-width: 1.4em; min-height: 1.4em; }
+
+/* ---------- Item editor (editor.js): same look as Settings ---------- */
+#itemEditorOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+}
+#itemEditorOverlay[hidden] { display: none; }
+#itemEditor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    width: min(560px, calc(100vw - 16px));
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--bg-panel);
+    color: var(--btn-text);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    font-size: var(--ui-font);
+}
+#itemEditor .settings-header { display: flex; justify-content: space-between; align-items: center; margin: 0; }
+#itemEditor h2 { margin: 0; font-size: calc(var(--ui-font) * 1.3); color: var(--accent); }
+#itemEditor .close-settings-btn { font-size: calc(var(--ui-font) * 1.3); }
+.ed-field { display: flex; flex-direction: column; gap: 4px; }
+.ed-field input {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0.45em 0.6em;
+    font-size: var(--ui-font);
+    color: var(--btn-text);
+    background: var(--text-box-bg);
+    border: 1px solid var(--text-box-border);
+    border-radius: var(--btn-radius, 10px);
+}
+.ed-inline { display: flex; align-items: flex-end; gap: var(--ui-gap); }
+.ed-emoji { flex: 1 1 auto; min-width: 0; max-width: 10em; }
+.ed-emoji input { font-size: var(--ui-emoji); text-align: center; padding: 0.1em; }
+#edEmojiPick { flex: none; width: auto; min-height: 44px; padding: 0 1em; font-size: var(--ui-font); }
+#itemEditor > * { flex-shrink: 0; } /* the dialog scrolls; its sections never squash */
+.ed-cats { margin: 0; padding: 8px; min-width: 0; border: 1px solid var(--border-color); border-radius: var(--btn-radius, 10px); }
+.ed-cats legend { padding: 0 4px; }
+#edCats { display: grid; grid-template-columns: repeat(auto-fill, minmax(11em, 1fr)); gap: 0 12px; max-height: 30vh; overflow-y: auto; }
+.ed-check { display: flex; align-items: center; gap: 0.5em; min-height: 44px; cursor: pointer; }
+.ed-check input { flex: none; width: 26px; height: 26px; accent-color: var(--accent); } /* px: WebKit form controls ignore em sizes */
+.ed-cat-emoji { flex: none; } /* its own element so the gap after it can't collapse */
+.ed-field[hidden], .ed-cats[hidden], .ed-check[hidden], .ed-btn[hidden] { display: none; }
+.ed-error { margin: 0; color: #dc2626; }
+.ed-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ui-gap);
+    position: sticky; /* Save / Cancel always visible while the dialog scrolls */
+    bottom: -16px;
+    margin: 0 -16px -16px;
+    padding: 10px 16px 16px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+}
+.ed-spacer { flex: 1; }
+.ed-btn {
+    min-height: 44px;
+    padding: 0 1.1em;
+    font-size: var(--ui-font);
+    color: var(--btn-text);
+    background: var(--btn-default);
+    border: 1px solid var(--border-color);
+    border-radius: var(--btn-radius, 10px);
+    cursor: pointer;
+}
+.ed-primary { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
+.ed-danger { color: #dc2626; background: transparent; border-color: #dc2626; }
+
+/* ---------- Edit mode ---------- */
+#editButton[aria-pressed="true"] { color: var(--accent-text) !important; background-color: var(--accent) !important; border-color: var(--accent) !important; }
+/* Drag handles only appear in Edit mode (reordering is an Edit-mode action) */
+.slippylist li .quick { display: none; }
+body.editing .slippylist li .quick { display: inline; cursor: grab; }
+body.editing .slippylist .quick::after { content: "\283F"; font-size: var(--ui-font); opacity: 0.6; }
+.ed-pencil {
+    float: right;
+    width: 44px; /* touch target */
+    height: max(36px, var(--ui-emoji));
+    margin: 0 0 0 0.4em;
+    padding: 0;
+    line-height: 1;
+    background: var(--btn-default);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+}
+.ed-pencil::after { content: "\270E"; font-size: var(--ui-font); color: var(--accent); }
+.slippylist li.ed-add { color: var(--accent) !important; font-weight: 600; border-style: dashed; }
+
+/* Theme font (was defined per theme but never applied; offline-safe system fallbacks come from each theme's stack) */
+html body, body button, body input, body textarea, body select { font-family: var(--font-family); } /* beats picmostyles.css "body { font-family: sans-serif }", which loads later */
+#customSettingsPanel .settings-row input[type="checkbox"] { width: 1.3em; height: 1.3em; flex: none; }
+
+/* E20: the text box (and the full-screen flip view) keep their fixed yellow background, so their text
+   must stay dark in every theme - dark themes set --btn-text to near-white, which was unreadable (~1.1:1) */
+#theText, #flip { color: #1f2937 !important; }
+#theText::placeholder { color: #6b7280; }
+
+/* E14: keep content clear of the status bar, camera cutout and home indicator (viewport-fit=cover) */
+#mainContainer {
+    padding-top: max(1vw, env(safe-area-inset-top));
+    padding-right: max(1vw, env(safe-area-inset-right));
+    padding-bottom: max(1vw, env(safe-area-inset-bottom));
+    padding-left: max(1vw, env(safe-area-inset-left));
+}
+#customSettingsPanel, #itemEditor {
+    max-width: min(600px, calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 16px));
+    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+}
+
+/* Landscape: full safe-area margin only on the camera side; the other side just clears the rounded corner */
+html.notch-left #mainContainer { padding-right: max(1vw, 12px); }
+html.notch-right #mainContainer { padding-left: max(1vw, 12px); }
+/* The camera-side inset includes a margin beyond the cutout itself (iPhone 17: inset 62pt, Dynamic Island ends
+   about 48pt from the edge; older notches: 47pt inset, about 30pt deep), so trim it a little to close the gap */
+html.notch-left #mainContainer { padding-left: max(12px, calc(env(safe-area-inset-left) - 6px)); }
+html.notch-right #mainContainer { padding-right: max(12px, calc(env(safe-area-inset-right) - 6px)); }
+
+/* ---------- Settings panel ---------- */
+/* G1: fits inside the screen (padding included) and scrolls inside, with the title bar pinned */
+#customSettingsPanel {
+    box-sizing: border-box;
+    padding: 0 20px 16px;
+    width: min(600px, calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 16px));
+}
+#customSettingsPanel .settings-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0 -20px;
+    padding: 8px 12px 8px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+}
+/* G10: one row rhythm and one section gap */
+#customSettingsPanel .settings-content { gap: 0; }
+#customSettingsPanel .settings-section { margin: 0; padding: 14px 0; border-bottom: 1px solid var(--border-color); }
+#customSettingsPanel .settings-section:last-child { border-bottom: none; }
+#customSettingsPanel .settings-section h3 { margin: 0 0 4px; color: var(--accent); }
+/* G2: 44px+ touch targets */
+#customSettingsPanel .settings-row { min-height: 48px; margin: 0; gap: 12px; }
+#customSettingsPanel .settings-row > label { cursor: pointer; }
+#customSettingsPanel .settings-row select, #customSettingsPanel .settings-row input[type="text"] {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 0.6em;
+    color: var(--btn-text);
+    background: var(--text-box-bg);
+    border: 1px solid var(--text-box-border);
+    border-radius: var(--btn-radius, 10px);
+}
+#customSettingsPanel .settings-row input[type="checkbox"] { width: 28px; height: 28px; accent-color: var(--accent); cursor: pointer; }
+/* G6: sliders show their value */
+.settings-slider-wrap { display: flex; align-items: center; gap: 10px; flex: 0 1 60%; min-width: 0; }
+.settings-slider-wrap input[type="range"] { flex: 1; min-width: 0; height: 36px; accent-color: var(--accent); cursor: pointer; }
+.settings-slider-wrap output { min-width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+/* G7: buttons that look like buttons */
+#customSettingsPanel .settings-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    width: 100%;
+    min-height: 48px;
+    margin: 8px 0 0;
+    padding: 0 14px;
+    text-align: left;
+    font-weight: 500;
+    color: var(--btn-text);
+    background: var(--btn-default);
+    border: 1px solid var(--border-color);
+    border-radius: var(--btn-radius, 10px);
+    cursor: pointer;
+}
+#customSettingsPanel .settings-action-btn:hover:not(:disabled) { background: var(--btn-hover); }
+/* G4: AI features shown as unavailable (with an explanation) outside the apps */
+#customSettingsPanel .settings-action-btn:disabled, .settings-unavailable { opacity: 0.55; cursor: not-allowed; }
+#customSettingsPanel .settings-note { margin: 0 0 4px; line-height: 1.35; font-size: var(--ui-font) !important; }
+
+/* G9: persona editor in the same style and sizes as the other dialogs */
+#personaOverlay > div { box-sizing: border-box; width: min(560px, calc(100vw - 16px)); font-size: var(--ui-font); }
+#personaOverlay h2 { font-size: calc(var(--ui-font) * 1.3); color: var(--accent); text-align: left; }
+#personaOverlay p, #personaOverlay label { font-size: var(--ui-font) !important; }
+#personaOverlay label { margin-bottom: 4px; }
+#personaOverlay select, #personaOverlay textarea {
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 0.6em !important;
+    font-size: var(--ui-font) !important;
+    border: 1px solid var(--text-box-border) !important;
+    border-radius: var(--btn-radius, 10px);
+}
+#personaOverlay textarea { min-height: 88px; padding: 0.5em 0.6em !important; }
+#p_cancel, #p_save { min-height: 44px; padding: 0 1.1em !important; font-size: var(--ui-font) !important; border-radius: var(--btn-radius, 10px) !important; }
+#p_save { color: var(--accent-text) !important; background: var(--accent) !important; }
+
+/* ---- Chat history (left column, under the categories) ----
+   It takes the height its messages need, up to half the column; the categories get the rest.
+   Dragging the divider fixes its height instead (saved as params.chatPaneFraction). */
+#chatDivider {
+    flex: none;
+    height: 12px;
+    margin: 6px 0;
+    border-radius: 6px;
+    background-color: var(--border-color);
+    cursor: row-resize;
+    touch-action: none;
+    transition: background-color 0.2s;
+}
+#chatDivider:hover, #chatDivider:active, #chatDivider:focus-visible {
+    background-color: var(--accent);
+    outline: none;
+}
+#chatHistoryContainer {
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: 50%;
+    height: auto;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    box-sizing: border-box;
+    padding: 0.5em;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-main);
+    font-size: max(16px, calc(var(--ui-font) * 0.9));
+    line-height: 1.25;
+}
+#chatHistoryContainer.sized { /* after the divider has been dragged */
+    flex: none;
+    max-height: none;
+    height: var(--chat-height);
+}
+#chatHistoryContainer[hidden], #chatDivider[hidden] { display: none !important; }
+.chat-bubble {
+    max-width: 85%;
+    padding: 0.35em 0.7em;
+    border-radius: 0.9em;
+    overflow-wrap: break-word;
+    font-family: inherit;
+}
+.chat-bubble.me { /* the TexCom user: an accent tint (like the selected category), so the text keeps full contrast in every theme */
+    align-self: flex-end;
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-main));
+    color: var(--btn-text);
+    border: 1px solid var(--accent);
+    border-bottom-right-radius: 0.2em;
+}
+.chat-bubble.partner {
+    align-self: flex-start;
+    background-color: var(--bg-panel);
+    color: var(--btn-text);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 0.2em;
+}
+
+/* Microphone (listening to the partner): clearly on when pressed */
+#micButton[aria-pressed="true"] {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+}
+
+/* ---- Conversation (conversation.js) ---- */
+.conv-bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 6px 0 0;
+    padding: 0.25em 0.3em 0.25em 0.6em;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-main);
+    color: var(--btn-text);
+    font-size: max(16px, calc(var(--ui-font) * 0.9));
+}
+.conv-bar[hidden] { display: none !important; }
+.conv-dot { width: 0.7em; height: 0.7em; border-radius: 50%; background: #f59e0b; flex: none; }
+.conv-bar[data-state="on"] .conv-dot { background: #16a34a; }
+.conv-bar-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.conv-bar-btn {
+    flex: none; min-height: 44px; min-width: 44px; padding: 0 0.8em; border-radius: var(--btn-radius);
+    border: 1px solid var(--border-color); background: var(--btn-default); color: var(--btn-text); font: inherit; cursor: pointer;
+}
+.conv-bar[data-state="on"] #convBarInvite { display: none; }
+.conv-bar-btn.danger, .conv-btn.danger { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+.conv-overlay {
+    position: fixed; inset: 0; z-index: 6000; display: flex; align-items: center; justify-content: center;
+    padding: 16px; box-sizing: border-box; background: rgba(0, 0, 0, 0.55);
+}
+.conv-overlay[hidden] { display: none !important; }
+.conv-box {
+    width: min(440px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box; padding: 20px;
+    border-radius: 14px; background: var(--bg-panel); color: var(--btn-text); font-size: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.conv-title { margin: 0 0 8px; font-size: 22px; color: var(--btn-text); }
+.conv-overlay[data-mode="invite"] [data-show="join"], .conv-overlay[data-mode="join"] [data-show="invite"] { display: none !important; }
+.conv-note { margin: 0 0 12px; line-height: 1.35; }
+.conv-qr { display: flex; justify-content: center; margin: 8px 0; }
+.conv-qr img, .conv-qr canvas { background: #fff; padding: 8px; border-radius: 8px; }
+.conv-code-row { text-align: center; margin: 4px 0; }
+.conv-code-row strong { font-size: 26px; letter-spacing: 0.08em; font-family: ui-monospace, Menlo, monospace; }
+.conv-link { margin: 4px 0 12px; font-size: 14px; text-align: center; word-break: break-all; opacity: 0.8; user-select: all; -webkit-user-select: all; }
+.conv-label { display: block; margin-bottom: 6px; font-weight: 600; }
+.conv-input {
+    width: 100%; box-sizing: border-box; min-height: 48px; padding: 10px 12px; font-size: 18px; border-radius: 10px;
+    border: 2px solid var(--border-color); background: var(--bg-main); color: var(--btn-text);
+}
+.conv-input:focus { outline: none; border-color: var(--accent); }
+.conv-buttons { display: flex; gap: 10px; margin-top: 12px; }
+.conv-btn {
+    flex: 1; min-height: 48px; padding: 0 12px; border-radius: 10px; font-size: 18px; cursor: pointer;
+    border: 1px solid var(--border-color); background: var(--btn-default); color: var(--btn-text);
+}
+.conv-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+.conv-status { min-height: 1.4em; margin: 10px 0 0; text-align: center; font-weight: 600; }
+.conv-status[data-kind="bad"] { color: #dc2626; }
+.conv-status[data-kind="ok"] { color: #16a34a; }
+
+/* Notices (Notiflix.Notify, set up in initNotices): centred, just below the toolbar, never covering it */
+[id^=NotiflixNotifyWrap] {
+    top: var(--notice-top, 70px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+}
+
+/* ---- Help panel (openHelp) ---- */
+.help-overlay { position: fixed; inset: 0; z-index: 15000; display: flex; align-items: center; justify-content: center;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    box-sizing: border-box; background: rgba(0, 0, 0, 0.55); }
+.help-overlay[hidden] { display: none !important; }
+.help-box { width: min(820px, 100%); height: 100%; max-height: 100%; display: flex; flex-direction: column; overflow: hidden;
+    border-radius: 14px; background: var(--bg-panel); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.help-bar { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 4px 16px;
+    border-bottom: 1px solid var(--border-color); color: var(--btn-text); }
+.help-title { font-size: 20px; font-weight: 700; }
+.help-close { min-width: 48px; min-height: 48px; border: none; border-radius: 10px; background: transparent; color: var(--btn-text);
+    font-size: 24px; cursor: pointer; }
+.help-close:hover, .help-close:focus-visible { background: var(--btn-hover); outline: none; }
+#helpFrame { flex: 1; width: 100%; border: 0; background: #f8fafc; }
+
+/* "Matching …" line above the phrases, only while the text box is filtering them */
+.filter-info {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0 0 6px;
+    padding: 0 0 0 0.6em;
+    min-height: 44px;
+    box-sizing: border-box;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--bg-main));
+    color: var(--btn-text);
+    font-size: max(16px, calc(var(--ui-font) * 0.9));
+}
+.filter-info[hidden] { display: none !important; }
+#filterInfoText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.filter-clear {
+    flex: none; min-width: 44px; min-height: 44px; border: none; background: transparent;
+    color: var(--btn-text); font-size: 20px; cursor: pointer; border-radius: 8px;
+}
+.filter-clear:hover, .filter-clear:focus-visible { background: var(--btn-hover); outline: none; }

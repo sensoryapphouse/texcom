@@ -1,0 +1,657 @@
+/* 
+   THEMES FOR TEXCOM 
+   Provides CSS variables and shared flexbox classes for the UI.
+*/
+
+/* --- Base Layout Classes --- */
+.flex-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    background-color: var(--btn-default);
+    color: var(--btn-text);
+    border-radius: var(--btn-radius);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 2vh;
+    padding: 0.5vh 0.5vw;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    background-color: var(--btn-hover);
+}
+
+.action-btn svg {
+    width: 4.5vh;
+    height: 4.5vh;
+    stroke-width: 2.5;
+    flex-shrink: 0;
+}
+.action-btn .sos-text {
+    font-size: 3.5vh;
+}
+
+/* --- Shared sizing: one base text size, never below 16px, growing gently with the smaller screen side --- */
+:root {
+    --ui-font: clamp(16px, calc(9px + 1.6vmin), 24px);
+    --ui-emoji: calc(var(--ui-font) * 1.4);
+    --ui-gap: 8px;
+}
+
+/* --- Option 1: Modern Clean (also the fallback, so nothing is ever transparent) --- */
+:root, .theme-modern {
+    --bg-main: #f8fafc;
+    --bg-panel: #ffffff;
+    --border-color: #e2e8f0;
+    --btn-default: #f1f5f9;
+    --btn-hover: #e2e8f0;
+    --btn-text: #334155;
+    --btn-radius: 12px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #cbd5e1;
+    --accent: #3b82f6;
+    --accent-text: #ffffff;
+}
+
+/* --- Option 2: High Contrast Flat (Accessible) --- */
+.theme-contrast {
+    --bg-main: #111827;
+    --bg-panel: #1f2937;
+    --border-color: #374151;
+    --btn-default: #374151;
+    --btn-hover: #4b5563;
+    --btn-text: #f9fafb;
+    --btn-radius: 4px;
+    --shadow: none;
+    --font-family: "Open Sans", Arial, sans-serif;
+    --text-box-bg: #000000;
+    --text-box-border: #f9fafb;
+    --accent: #fcd34d;
+    --accent-text: #000000;
+}
+
+.theme-contrast .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* --- Option 3: Playful & Soft --- */
+.theme-playful {
+    --bg-main: #fffbeb;
+    --bg-panel: #fef3c7;
+    --border-color: #fde68a;
+    --btn-default: #fdf4ff;
+    --btn-hover: #fae8ff;
+    --btn-text: #701a75;
+    --btn-radius: 24px;
+    --shadow: 0 8px 0px -2px #fbcfe8;
+    --font-family: "Quicksand", "Comic Sans MS", cursive, sans-serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #fbcfe8;
+    --accent: #ec4899;
+    --accent-text: #ffffff;
+}
+
+.theme-playful .action-btn {
+    background: transparent;
+    border: none; border-color: var(--btn-hover); }
+
+
+/* --- Grid Layout Engine --- */
+
+.pane {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    height: 100%;
+    overflow: hidden;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: 100vh;
+    width: 100vw;
+    margin-top: 0;
+    gap: 1vw;
+    padding: 1vw;
+    box-sizing: border-box;
+}
+
+
+.text-speak-row {
+    display: flex;
+    gap: 1vw;
+    width: 100%;
+    margin-bottom: 1vh;
+    align-items: stretch;
+}
+#theText {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    font-size: 3vh;
+    padding: 1vw;
+    border-radius: var(--btn-radius);
+    background-color: var(--text-box-bg);
+    color: var(--btn-text);
+    border: 3px solid var(--text-box-border);
+    outline: none;
+    min-height: 12vh;
+    height: auto;
+    box-sizing: border-box;
+}
+#theText:focus {
+    border-color: var(--accent);
+}
+#speakButton {
+    flex: none;
+    width: max(64px, calc(var(--ui-font) * 4.5)); /* icon + "Speak" with padding; the text box gets the rest */
+    height: auto;
+}
+
+/* Two-column layout: landscape, or portrait at least 700px wide. Class set by updateLayoutMode() in index.html. */
+    .layout-two .main-layout {
+        display: grid;
+        grid-template-columns: var(--left-pane-width, min(350px, 38vw)) 12px minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+    }
+    .layout-two #topToolbar {
+        grid-column: 1 / span 3;
+        grid-row: 1;
+    }
+
+    .layout-two #leftPane {
+        grid-column: 1;
+        grid-row: 2;
+        flex: none !important;
+        height: 100% !important;
+    }
+    /* Two columns: the selected category is highlighted in the list, so no toggle or heading */
+    .layout-two #theCategories, .layout-two #leftPane > h2:first-of-type {
+        display: none !important;
+    }
+    .layout-two #leftPane, .layout-two #rightPane {
+        padding: 0 !important;
+    }
+    .layout-two #categoryList {
+        margin-bottom: 0 !important;
+    }
+    .layout-two #messagesList {
+        display: block !important;
+    }
+
+    .layout-two #paneResizer {
+        grid-column: 2;
+        grid-row: 2;
+        display: block;
+        width: 12px;
+        background-color: var(--border-color);
+        cursor: col-resize;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        z-index: 100;
+    }
+    .layout-two #paneResizer:hover, .layout-two #paneResizer:active {
+        background-color: var(--accent);
+    }
+    .layout-two #rightPane {
+        grid-column: 3;
+        grid-row: 2;
+        flex: none !important;
+        height: 100% !important;
+    }
+
+
+/* One-column layout: portrait narrower than 700px. Class set by updateLayoutMode() in index.html. */
+    .layout-one .main-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    /* Unwrap the panes so their children can interleave using flex order */
+    .layout-one #leftPane, .layout-one #rightPane {
+        display: contents !important;
+    }
+    .layout-one #paneResizer {
+        display: none !important;
+    }
+
+    /* Set exact display ordering based on layout spec */
+    .layout-one #topToolbar {
+        order: 1;
+    }
+    .layout-one .text-speak-row {
+        order: 2;
+        flex: none !important;
+    }
+    .layout-one #theCategories {
+        order: 6;
+        display: block !important;
+        margin-top: 1vh;
+    }
+    /* Hide the static 'Categories' header in portrait mode, we use the toggle button */
+    .layout-one #leftPane > h2:first-of-type {
+        display: none !important;
+    }
+    .layout-one #categoryList {
+        order: 7;
+        flex: none !important;
+    }
+    .layout-one #categoryList:not([hidden]) {
+        height: 60vh !important;
+        margin-bottom: 1vh !important;
+    }
+    .layout-one #filterInfo {
+        order: 8;
+    }
+    .layout-one #aiPredictionBox {
+        order: 9;
+    }
+    .layout-one #messagesList {
+        order: 10;
+        flex: 1 1 0% !important;
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+    
+    /* Chat history (when switched on, or during a conversation): under the text box, above the phrases,
+       sized to its messages up to 35% of the screen; the divider sits below it */
+    .layout-one #convBar { order: 3; }
+    .layout-one #chatHistoryContainer { order: 4; max-height: 35vh; }
+    .layout-one #chatDivider { order: 5; }
+
+    .layout-one #customSettingsPanel {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+
+
+
+
+
+
+
+
+/* --- Option 6: Dark Mode Classic --- */
+.theme-dark {
+    --bg-main: #121212;
+    --bg-panel: #1e1e1e;
+    --border-color: #333333;
+    --btn-default: #2d2d2d;
+    --btn-hover: #3d3d3d;
+    --btn-text: #e0e0e0;
+    --btn-radius: 8px;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.5);
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --text-box-bg: #1e1e1e;
+    --text-box-border: #444444;
+    --accent: #6366f1;
+    --accent-text: #ffffff;
+}
+.theme-dark .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* --- Option 7: Forest Edge --- */
+.theme-forest {
+    --bg-main: #f1f8f1;
+    --bg-panel: #e2ede2;
+    --border-color: #b2ccb2;
+    --btn-default: #d1e0d1;
+    --btn-hover: #b2ccb2;
+    --btn-text: #2d4d2d;
+    --btn-radius: 12px;
+    --shadow: 0 4px 10px rgba(45, 77, 45, 0.1);
+    --font-family: "Georgia", serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #8fbc8f;
+    --accent: #2e8b57;
+    --accent-text: #ffffff;
+}
+
+/* --- Option 8: Sunset Glow --- */
+.theme-sunset {
+    --bg-main: #fff5f0;
+    --bg-panel: #ffe4d6;
+    --border-color: #ffbba6;
+    --btn-default: #ffd3c4;
+    --btn-hover: #ffbba6;
+    --btn-text: #7a2e15;
+    --btn-radius: 20px;
+    --shadow: 0 4px 12px rgba(255, 136, 85, 0.2);
+    --font-family: "Trebuchet MS", "Lucida Sans Unicode", sans-serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #ff9973;
+    --accent: #ea580c;
+    --accent-text: #ffffff;
+}
+
+/* --- Option 9: Monochrome Minimalist --- */
+.theme-mono {
+    --bg-main: #ffffff;
+    --bg-panel: #f5f5f5;
+    --border-color: #000000;
+    --btn-default: #ffffff;
+    --btn-hover: #e0e0e0;
+    --btn-text: #000000;
+    --btn-radius: 0px;
+    --shadow: none;
+    --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #000000;
+    --accent: #000000;
+    --accent-text: #ffffff;
+}
+.theme-mono .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* --- Option 10: Retro Terminal --- */
+.theme-retro {
+    --bg-main: #000000;
+    --bg-panel: #001100;
+    --border-color: #00ff00;
+    --btn-default: #002200;
+    --btn-hover: #004400;
+    --btn-text: #00ff00;
+    --btn-radius: 0px;
+    --shadow: 0 0 8px #00ff00;
+    --font-family: "Courier New", Courier, monospace;
+    --text-box-bg: #000000;
+    --text-box-border: #00ff00;
+    --accent: #00ff00;
+    --accent-text: #000000;
+}
+.theme-retro .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* Ensure hidden attribute is always respected */
+[hidden] {
+    display: none !important;
+}
+
+.pane-resizer {
+    display: none;
+}
+
+
+
+
+/* --- Option 4: Ocean Breeze --- */
+.theme-ocean {
+    --bg-main: #f0fdfa;
+    --bg-panel: #ccfbf1;
+    --border-color: #5eead4;
+    --btn-default: #e0f2fe;
+    --btn-hover: #bae6fd;
+    --btn-text: #0f766e;
+    --btn-radius: 16px;
+    --shadow: 0 4px 15px -3px rgba(13, 148, 136, 0.2);
+    --font-family: "Nunito", "Segoe UI", sans-serif;
+    --text-box-bg: #ffffff;
+    --text-box-border: #99f6e4;
+    --accent: #0284c7;
+    --accent-text: #ffffff;
+}
+.theme-ocean .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* --- Option 5: Neon Cyberpunk --- */
+.theme-neon {
+    --bg-main: #09090b;
+    --bg-panel: #18181b;
+    --border-color: #d946ef;
+    --btn-default: #27272a;
+    --btn-hover: #3f3f46;
+    --btn-text: #f4f4f5;
+    --btn-radius: 0px;
+    --shadow: 0 0 10px #d946ef, inset 0 0 5px #d946ef;
+    --font-family: "Courier New", monospace;
+    --text-box-bg: #000000;
+    --text-box-border: #06b6d4;
+    --accent: #d946ef;
+    --accent-text: #ffffff;
+}
+.theme-neon .action-btn {
+    background: transparent;
+    border: none; border-color: var(--border-color); }
+
+/* --- Settings Overlay --- */
+#settingsOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#settingsOverlay.open {
+    opacity: 1;
+}
+#customSettingsPanel {
+    background: var(--bg-panel);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    width: 90vw; max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2vw;
+    box-shadow: var(--shadow);
+    color: var(--btn-text);
+}
+.settings-section {
+    margin-bottom: 2vh;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1vh;
+}
+.settings-section h2 {
+    font-size: 2.5vh;
+    margin-bottom: 1vh;
+    color: var(--accent);
+}
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1vh;
+    font-size: 2vh;
+}
+.settings-row select, .settings-row input[type="text"], .settings-row input[type="number"] {
+    background: var(--text-box-bg);
+    color: var(--btn-text);
+    border: 1px solid var(--border-color);
+    padding: 0.5vh 1vw;
+    border-radius: 4px;
+    font-size: 2vh;
+}
+.settings-row button {
+    background: var(--btn-default);
+    color: var(--btn-text);
+    border: 1px solid var(--border-color);
+    padding: 0.5vh 1vw;
+    border-radius: 4px;
+    font-size: 2vh;
+    cursor: pointer;
+}
+.settings-row button:hover {
+    background: var(--btn-hover);
+}
+#closeSettings {
+    width: 100%;
+    margin-top: 2vh;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    padding: 1vh;
+    font-size: 2.5vh;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2vh;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1vh;
+}
+.settings-header h2 {
+    font-size: 3vh;
+    color: var(--accent);
+    margin: 0;
+}
+.close-settings-btn {
+    background: transparent;
+    border: none;
+    color: var(--btn-text);
+    font-size: 3vh;
+    cursor: pointer;
+}
+.close-settings-btn:hover {
+    color: var(--accent);
+}
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+}
+
+.settings-action-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 1vh;
+    background: var(--btn-default);
+    color: var(--btn-text);
+    border: 1px solid var(--border-color);
+    padding: 1.5vh;
+    border-radius: 8px;
+    font-size: 2vh;
+    cursor: pointer;
+    text-align: left;
+}
+.settings-action-btn:hover {
+    background: var(--btn-hover);
+}
+
+
+/* Accessibility: Focus States */
+:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.action-btn:focus-visible {
+    outline: 3px solid #3b82f6;
+    border-radius: 8px;
+}
+
+/* --- Toolbar: fixed-size buttons (>= 44px touch targets) in groups.
+   Buttons that don't fit move into the ⋯ menu (layoutToolbar in sketch2.js). --- */
+:root {
+    --tb-btn: max(44px, calc(var(--ui-font) * 2.3));
+}
+#topToolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 0;
+    overflow: hidden;
+    min-height: var(--tb-btn);
+    z-index: 5000;
+}
+#topToolbar .action-btn, #moreMenu .action-btn {
+    flex: none;
+    width: var(--tb-btn);
+    height: var(--tb-btn);
+    min-width: 0;
+    padding: 0;
+    background-color: var(--btn-default);
+    border: 1px solid var(--border-color);
+    border-radius: var(--btn-radius, 10px);
+}
+#topToolbar .action-btn:hover { background-color: var(--btn-hover); }
+#topToolbar .action-btn svg {
+    width: 60%;
+    height: 60%;
+    max-width: none;
+    max-height: none;
+    flex-shrink: 0;
+}
+#topToolbar .action-btn[data-group-start] { margin-left: calc(var(--tb-btn) * 0.35); }
+#topToolbar .tb-push { margin-left: auto; } /* set by markToolbarPush() in sketch2.js */
+#topToolbar .tb-title {
+    flex: none;
+    margin: 0 0.5em 0 0.2em;
+    white-space: nowrap;
+    font-size: calc(var(--ui-font) * 1.1);
+    font-weight: 700;
+    color: var(--accent);
+}
+#topToolbar .tb-title[hidden] { display: none; }
+#topToolbar .action-btn:disabled, #moreMenu .action-btn:disabled { opacity: 0.4; cursor: default; }
+/* SOS: a red badge that fits the same box as the other icons */
+.action-btn .sos-text {
+    display: inline-block;
+    font-size: calc(var(--tb-btn) * 0.27) !important;
+    line-height: 1;
+    padding: 0.35em 0.4em;
+    border-radius: 6px;
+    background: #dc2626;
+    color: #ffffff !important;
+    font-weight: 800;
+}
+/* ⋯ menu */
+#moreMenu {
+    position: fixed;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 12em;
+    padding: 4px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+#moreMenu[hidden] { display: none; }
+#moreMenu .action-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.6em;
+    width: 100%;
+    padding: 0 0.8em;
+    border: none;
+    background: transparent;
+    font-size: var(--ui-font);
+    color: var(--btn-text);
+}
+#moreMenu .action-btn:hover { background-color: var(--btn-hover); }
+#moreMenu .action-btn svg { width: calc(var(--tb-btn) * 0.55); height: calc(var(--tb-btn) * 0.55); flex-shrink: 0; }
+#moreMenu .action-btn::after { content: attr(title); font-weight: 500; }

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TexCom</title>
+    <script>
+        // Layout rule (spec section 4): landscape -> two columns; portrait -> two columns
+        // only if the window is at least TWO_COLUMN_MIN_WIDTH wide (e.g. a near-square foldable).
+        // Sets html.layout-two / html.layout-one, which both the CSS and the JS read.
+        (function () {
+            var TWO_COLUMN_MIN_WIDTH = 700;
+            var decided = null;
+            function isTyping() {
+                var a = document.activeElement;
+                return !!a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && /^(text|search|email|url|tel|number|password)$/i.test(a.type)));
+            }
+            window.updateLayoutMode = function () {
+                var w = window.innerWidth, h = window.innerHeight;
+                // An on-screen keyboard only shrinks the height; don't let it flip the layout.
+                if (decided && isTyping() && w === decided.w && h < decided.h) return decided.twoColumn;
+                var twoColumn = (w > h) || (w >= TWO_COLUMN_MIN_WIDTH);
+                decided = { w: w, h: h, twoColumn: twoColumn };
+                document.documentElement.classList.toggle('layout-two', twoColumn);
+                document.documentElement.classList.toggle('layout-one', !twoColumn);
+                return twoColumn;
+            };
+            window.isOneColumnLayout = function () { return !window.updateLayoutMode(); };
+            window.updateLayoutMode();
+            window.addEventListener('resize', window.updateLayoutMode);
+
+            // In landscape iOS reports the same safe-area inset on both sides, though the camera cutout is
+            // only on one. Mark which side it's on so the CSS can give the other side a small margin.
+            function updateNotchSide() {
+                var a = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : window.orientation;
+                var el = document.documentElement;
+                el.classList.toggle('notch-left', a === 90);
+                el.classList.toggle('notch-right', a === 270 || a === -90);
+            }
+            updateNotchSide();
+            window.addEventListener('resize', updateNotchSide);
+            window.addEventListener('orientationchange', updateNotchSide);
+        })();
+    </script>
+    <link rel="stylesheet" href="themes.css">
+    <!--    <link rel="manifest" href="manifest.json">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0,viewport-fit=cover, user-scalable=no">
+<!--        <meta name="viewport" content="width=device-width, user-scalable=no">-->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+    <script src="libraries/tinycolor-min.js"></script>
+    <script src="libraries/dat.gui.min.js" type="text/javascript"></script>
+    <script src="libraries/recorder.js"></script>
+    <script src="libraries/slip.js"></script>
+    <script src="gamepads.js"></script>
+    <script src="idb-keyval-iife.js"></script>
+   <link rel="stylesheet" type="text/css" href="slip.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="libraries/notiflix-confirm-aio-3.2.5.min.js"></script>
+    <script src="libraries/notiflix-loading-aio-3.2.5.min.js"></script>
+    <script src="libraries/notiflix-notify-aio-3.2.5.min.js"></script> <!-- used for "Communicator Loaded!" etc.; was never loaded -->
+    <script src="libraries/peerjs.min.js"></script>
+    <script src="libraries/qrcode.min.js"></script>
+    <link href="MarcTooltips.css" rel="stylesheet">
+    <script src="libraries/MarcTooltips.js"></script>
+    <!--    <link rel="stylesheet" type="text/css" href="dat-gui-font.css">-->
+    <link rel="stylesheet" href="libraries/picmo/picmostyles.css" />
+    <script type="module" src="libraries/picmo/popup.js"></script>
+
+    <meta charset="utf-8">
+</head>
+
+<body id="body" oncontextmenu="return false;">
+
+        <splash class="btn" enabled></splash>
+        <startSplash class="btn" enabled></startSplash>
+        <helpSplash class=" btn" enabled></helpSplash>
+        
+        
+        
+
+        
+        
+
+        
+
+        
+
+        <theText class=" btn" enabled></theText>
+        
+        
+
+        <!-- Help (texcomhelp.html) in a panel over TexCom, so there is always a way back -->
+        <div id="helpOverlay" class="help-overlay" hidden>
+            <div class="help-box" role="dialog" aria-modal="true" aria-label="TexCom Help">
+                <div class="help-bar"><span class="help-title">Help</span><button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button></div>
+                <iframe id="helpFrame" title="TexCom Help"></iframe>
+            </div>
+        </div>
+        <!-- Conversation over the internet (conversation.js): invite someone, or join someone's conversation -->
+        <div id="convDialog" class="conv-overlay" hidden>
+            <div class="conv-box" role="dialog" aria-modal="true" aria-labelledby="convTitle">
+                <h2 id="convTitle" class="conv-title"><span data-show="invite">Start a conversation</span><span data-show="join">Join a conversation</span></h2>
+                <div data-show="invite">
+                    <p class="conv-note">Send this link to the person you want to talk to, or let them scan the code. They can use any phone or computer, or their own TexCom.</p>
+                    <div id="convQR" class="conv-qr" aria-hidden="true"></div>
+                    <p class="conv-code-row">Code: <strong id="convCode"></strong></p>
+                    <p id="convLink" class="conv-link"></p>
+                    <div class="conv-buttons">
+                        <button id="convShare" class="conv-btn primary" type="button">Share link…</button>
+                        <button id="convCopy" class="conv-btn" type="button">Copy link</button>
+                    </div>
+                </div>
+                <div data-show="join">
+                    <p class="conv-note">Paste the link you were sent, or type the code.</p>
+                    <label for="convJoinInput" class="conv-label">Link or code</label>
+                    <input id="convJoinInput" class="conv-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. k7m2 qx9p">
+                    <div class="conv-buttons">
+                        <button id="convJoinGo" class="conv-btn primary" type="button">Join</button>
+                        <button id="convJoinCancel" class="conv-btn" type="button">Cancel</button>
+                    </div>
+                </div>
+                <p id="convStatus" class="conv-status" role="status"></p>
+                <div class="conv-buttons" data-show="invite">
+                    <button id="convClose" class="conv-btn" type="button">Close (keep waiting)</button>
+                    <button id="convEndInvite" class="conv-btn danger" type="button">End</button>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <!--    <div id="scroll">-->
+        
+
+        
+
+        <!--        <div id="listCat" class="check-list">-->
+        <ul id="listCat" class="check-list">
+            <!--<li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>
+            <li><input type="checkbox" />Apple </li>-->
+        </ul>
+        <!--        </div>-->
+
+        
+    
+<div id="mainContainer" class="main-layout" style="width: 100vw; height: 100vh; overflow: hidden; background: var(--bg-main);">
+    <!-- Floating Live Transcript Pill -->
+    <div id="liveTranscriptPill" style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: white; padding: 10px 20px; border-radius: 999px; font-size: 2.2vh; font-weight: 500; z-index: 10000; display: none; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"></div>
+
+    
+    <!-- LEFT PANE -->
+    <div id="leftPane" style="display: flex; flex-direction: column; padding: 40px 10px 10px 10px; box-sizing: border-box; background: var(--bg-panel); overflow: hidden; position: relative;">
+        
+        <btn id="theCategories" enabled style="display: none;">Categories: All ⏩</btn>
+        <h2 style="margin: 0 0 10px 0; font-size: 2.5vh; color: var(--accent); flex-shrink: 0;">Categories</h2>
+        <ul id="categoryList" class="slippylist" style="flex: 1; overflow-y: auto; margin-bottom: 15px; font-size: 2.5vh;">
+            <li class="demo-no-reorder"><span style="font-size:3.5vh;">🔷&#8201;</span> All</li>
+        </ul>
+        
+        <!-- Chat history (Settings > Smart AI > Show chat history). The divider resizes it; it has no heading. -->
+        <div id="convBar" class="conv-bar" hidden><span class="conv-dot" aria-hidden="true"></span><span id="convBarLabel" class="conv-bar-label"></span><button id="convBarInvite" class="conv-bar-btn" type="button">Link</button><button id="convBarEnd" class="conv-bar-btn danger" type="button">End</button></div>
+        <div id="chatDivider" role="separator" aria-orientation="horizontal" aria-label="Resize chat history" aria-controls="chatHistoryContainer" tabindex="0" hidden></div>
+        <div id="chatHistoryContainer" role="log" aria-label="Chat history" hidden></div>
+        
+        <!-- AI AutoReply Box stacked vertically -->
+        
+    </div>
+
+    <!-- RIGHT PANE -->
+    <div id="paneResizer" class="pane-resizer" style="z-index: 5000; cursor: col-resize; display: block;"></div>
+<div id="topToolbar" role="toolbar" aria-label="Actions">
+            <span id="tbTitle" class="tb-title" aria-hidden="true">TexCom</span> <!-- shown only when every button fits (layoutToolbar) -->
+            <button id="clearButton" class="action-btn" title="Clear" aria-label="Clear"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            <button id="undoButton" class="action-btn" title="Undo" aria-label="Undo"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+            <button id="redoButton" class="action-btn" title="Redo" aria-label="Redo"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
+            <button id="micButton" class="action-btn" data-group-start title="Listen to partner" aria-label="Listen to partner" aria-pressed="false" hidden><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg></button>
+            <button id="bellButton" class="action-btn" title="Alert" aria-label="Alert"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></button>
+            <button id="noButton" class="action-btn" title="No" aria-label="No"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <button id="yesButton" class="action-btn" title="Yes" aria-label="Yes"><svg style="color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></button>
+            <button id="sosButton" class="action-btn" title="SOS" aria-label="SOS"><span class="sos-text" style="color: #ef4444; font-weight: bold;">SOS</span></button>
+            <button id="favButton" class="action-btn" title="Favourite" aria-label="Favourite"><svg style="color: #eab308;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+            <button id="editButton" class="action-btn" title="Edit phrases" aria-label="Edit phrases" aria-pressed="false"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 16.536 8 17.5l.964-4.5z M5 19h14"></path></svg></button>
+            <button id="settingsButton" class="action-btn" title="Settings" aria-label="Settings"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+            <button id="uploadButton" class="action-btn" title="Share" aria-label="Share"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></button>
+            <button id="moreButton" class="action-btn" title="More" aria-label="More" aria-haspopup="menu" aria-expanded="false" hidden><svg fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+        </div>
+        
+        <div id="rightPane" style="display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; overflow: hidden; position: relative;">
+<div class="text-speak-row" style="display: flex; gap: 10px; flex-shrink: 0; margin-bottom: 10px; height: 15vh;">
+            <textarea id="theText" placeholder="Text to speak or search." enabled style="flex: 1; border-radius: var(--btn-radius); padding: 10px; font-size: 3vh; border: 2px solid var(--border-color); resize: none; outline: none; background: #fef08a; color: #1f2937;"></textarea>
+            <button id="speakButton" class="action-btn" style="background-color: var(--accent); color: var(--accent-text); border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: var(--btn-radius); cursor: pointer;">
+                <svg style="width: 6vh; height: 6vh; color: var(--accent-text); margin-bottom: 5px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <span style="font-size: 2.5vh; font-weight: bold;">Speak</span>
+            </button>
+        </div>
+        
+        <!-- No Search box: the text box searches (the words after its last punctuation). This line shows only while it does. -->
+        <div id="filterInfo" class="filter-info" role="status" hidden><span id="filterInfoText"></span><button id="filterClear" class="filter-clear" type="button" aria-label="Show all phrases">✕</button></div>
+        
+        <div id="aiPredictionBox" style="display: none; min-height: 4vh; padding: 4px 0; width: 100%; align-items: center; justify-content: flex-start; gap: 8px; z-index: 1000; overflow-x: auto; white-space: nowrap; margin-bottom: 10px; flex-shrink: 0;">
+            <button class="ai-predict-btn" style="flex: 0 0 auto; height: auto;  border-radius: 999px; border: 1px solid #3b82f6; background: #eff6ff; font-size: 2vh; color: #1d4ed8; cursor: pointer; display: none; padding: 6px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"></button>
+            <button class="ai-predict-btn" style="flex: 0 0 auto; height: auto;  border-radius: 999px; border: 1px solid #3b82f6; background: #eff6ff; font-size: 2vh; color: #1d4ed8; cursor: pointer; display: none; padding: 6px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"></button>
+            <button class="ai-predict-btn" style="flex: 0 0 auto; height: auto;  border-radius: 999px; border: 1px solid #3b82f6; background: #eff6ff; font-size: 2vh; color: #1d4ed8; cursor: pointer; display: none; padding: 6px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"></button>
+        </div>
+
+        <ul id="messagesList" class="slippylist" style="flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-panel);"></ul>
+    </div>
+</div>
+<div id="moreMenu" role="menu" hidden></div>
+<buttonPanel class="btn" enabled hidden></buttonPanel>
+        <button id="trigger" hidden></button>
+
+        <script src="versions.js"></script>
+        <script src="settings.js"></script>
+        <script src="gpad.js"></script>
+        <script src="panel.js"></script>
+        <script src="languages.js"></script>
+        <script src="record.js"></script>
+        <script src="audio.js"></script>
+        <script src="partner-link.js"></script>
+    <script src="conversation.js"></script>
+        <script src="sketch2.js?1789976789"></script>
+        <script src="editor.js"></script>
+        <input type="file" id="file-input" hidden accept=".json">
+        <input type="file" id="text-input" hidden accept=".txt">
+        <input type="file" id="image-input" hidden accept="image/*">
+        <input type="file" id="sound-input" hidden accept="audio/*">
+        
+    
+    <div id="itemEditorOverlay" hidden>
+        <div id="itemEditor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+            <div class="settings-header">
+                <h2 id="edTitle">Edit phrase</h2>
+                <button type="button" class="close-settings-btn" id="edClose" aria-label="Cancel">✖</button>
+            </div>
+            <label class="ed-field"><span>Text</span><input id="edText" type="text" autocomplete="off"></label>
+            <p id="edError" class="ed-error" role="alert" hidden></p>
+            <div class="ed-inline">
+                <label class="ed-field ed-emoji"><span>Symbol</span><input id="edEmoji" type="text" maxlength="16" autocomplete="off"></label>
+                <button type="button" id="edEmojiPick" class="settings-action-btn">Choose…</button>
+            </div>
+            <label class="ed-field" data-for="phrase"><span>Shortcut (type it, then /)</span><input id="edAbbrev" type="text" autocomplete="off"></label>
+            <fieldset class="ed-cats" data-for="phrase"><legend>Categories</legend><div id="edCats"></div></fieldset>
+            <label class="ed-check" data-for="phrase"><input type="checkbox" id="edInstant"> <span>Instant message (speak as soon as it's tapped)</span></label>
+            <label class="ed-check"><input type="checkbox" id="edFixed"> <span>Keep in a fixed position</span></label>
+            <label class="ed-check"><input type="checkbox" id="edDeletable"> <span>Allow it to be deleted</span></label>
+            <div class="ed-actions">
+                <button type="button" id="edDelete" class="ed-btn ed-danger">Delete</button>
+                <span class="ed-spacer"></span>
+                <button type="button" id="edCancel" class="ed-btn">Cancel</button>
+                <button type="button" id="edSave" class="ed-btn ed-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsOverlay">
+        <div id="customSettingsPanel">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button type="button" class="close-settings-btn" onclick="toggleSettings()">✖</button>
+            </div>
+            <div class="settings-content" id="settingsContent">
+                <!-- Settings will be injected here by settings.js -->
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+        (function() {
+            const resizer = document.getElementById('paneResizer');
+            const mainContainer = document.getElementById('mainContainer');
+            let isDragging = false;
+            let fraction = null; // left column as a fraction of the width; null = CSS default
+
+            // Left column: at least 25% (and 200px), at most 50%, so the main right column keeps at least half
+            window.applyLeftPane = function (f) {
+                if (f == null) { fraction = null; mainContainer.style.removeProperty('--left-pane-width'); return; }
+                const cs = getComputedStyle(mainContainer);
+                // Width shared by the two columns (minus padding, the 12px splitter and the two grid gaps)
+                const w = mainContainer.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 12 - 2 * parseFloat(cs.columnGap || 0);
+                const px = Math.min(Math.max(f * w, Math.max(200, 0.25 * w)), 0.5 * w);
+                fraction = px / w; // store the constrained position
+                mainContainer.style.setProperty('--left-pane-width', Math.round(px) + 'px');
+            };
+            window.addEventListener('resize', function () { if (fraction != null) applyLeftPane(fraction); });
+
+            function dragTo(clientX) {
+                const r = mainContainer.getBoundingClientRect();
+                const cs = getComputedStyle(mainContainer);
+                const w = r.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 12 - 2 * parseFloat(cs.columnGap || 0);
+                applyLeftPane((clientX - r.left - parseFloat(cs.paddingLeft)) / w);
+            }
+            function endDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.style.cursor = '';
+                if (typeof params !== 'undefined' && typeof saveParams === 'function') {
+                    params.leftPaneFraction = fraction;
+                    saveParams();
+                }
+            }
+
+            if (resizer && mainContainer) {
+                resizer.addEventListener('mousedown', function (e) {
+                    isDragging = true;
+                    document.body.style.cursor = 'col-resize';
+                    e.preventDefault();
+                });
+                document.addEventListener('mousemove', function (e) { if (isDragging) dragTo(e.clientX); });
+                document.addEventListener('mouseup', endDrag);
+
+                // Touch support
+                resizer.addEventListener('touchstart', function () { isDragging = true; }, { passive: true });
+                document.addEventListener('touchmove', function (e) { if (isDragging) dragTo(e.touches[0].clientX); }, { passive: true });
+                document.addEventListener('touchend', endDrag);
+            }
+        })();
+    </script>
+</body>
+
+
+</html>
