@@ -8,7 +8,7 @@
 //                             {t:'say', text} {t:'bye'}
 (function () {
     const RELAY_URL = 'https://texcom-relay.dave-c09.workers.dev/ice';
-    const PUBLIC_BASE = 'https://sensoryapphouse.github.io/texcom/'; // where companion.html is published
+    const PUBLIC_BASE = 'https://texcom.pages.dev/'; // where companion.html is published
     const FALLBACK_ICE = [{ urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.l.google.com:19302' }];
     const ID_PREFIX = 'texcom-';
     const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789'; // no 0/o, 1/l/i
