@@ -9492,7 +9492,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9504,7 +9504,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9516,7 +9516,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9528,7 +9528,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9540,7 +9540,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9552,7 +9552,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9564,7 +9564,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -9576,7 +9576,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13332,7 +13332,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13344,7 +13344,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13356,7 +13356,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13368,7 +13368,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13380,7 +13380,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13392,7 +13392,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Technology]",
+   "categories": "[Equipment]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13404,7 +13404,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13416,7 +13416,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13428,7 +13428,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13440,7 +13440,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13452,7 +13452,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13464,7 +13464,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Environment]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13524,7 +13524,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Meals & Dining]",
+   "categories": "[Physical state]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13536,7 +13536,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Meals & Dining]",
+   "categories": "[Opinion]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13548,7 +13548,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Meals & Dining]",
+   "categories": "[Opinion]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13560,7 +13560,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Meals & Dining]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13572,7 +13572,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Meals & Dining]",
+   "categories": "[Request]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13584,7 +13584,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Emergency]",
+   "categories": "[Assistance]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13596,7 +13596,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Emergency]",
+   "categories": "[Assistance][Symptoms]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13608,7 +13608,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Emergency]",
+   "categories": "[Assistance]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13620,7 +13620,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Emergency]",
+   "categories": "[Assistance][Symptoms]",
    "gotaudio": false,
    "audioData": ""
   },
@@ -13632,7 +13632,7 @@
    "fixed": false,
    "abbreviation": " ",
    "instant": false,
-   "categories": "[Emergency]",
+   "categories": "[Assistance]",
    "gotaudio": false,
    "audioData": ""
   }

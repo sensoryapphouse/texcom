@@ -26,7 +26,7 @@
         get connected() { return !!(this.conn && this.conn.open); },
     };
 
-    function myName() { return (typeof params !== 'undefined' && params.UserName && params.UserName.trim()) || 'TexCom user'; }
+    function myName() { return (typeof params !== 'undefined' && params.UserName && params.UserName.trim()) || t('TexCom user'); }
     function randomCode(n) {
         const a = new Uint32Array(n); crypto.getRandomValues(a);
         return [...a].map(x => CODE_CHARS[x % CODE_CHARS.length]).join('');
@@ -44,6 +44,15 @@
         return /^[a-z0-9]{6,16}$/.test(code) ? code : '';
     }
 
+    // The server that introduces the two devices (PeerJS's free one unless the relay names another, so it can be
+    // moved without an app update): { host, port, path, secure, key } or null
+    let signalling = null;
+    function peerOptions(config) { return Object.assign({ config, debug: 0 }, signalling || {}); }
+    // "No internet" only when the device says so; otherwise it's the conversation service that can't be reached
+    function networkMessage() {
+        return navigator.onLine === false ? t('No internet connection. Trying again…') : t('Can’t reach the conversation service. Trying again…');
+    }
+
     async function iceServers() {
         try {
             const ctl = new AbortController();
@@ -52,6 +61,7 @@
             clearTimeout(timer);
             const j = await r.json();
             C.relay = !!j.relay;
+            signalling = (j.signalling && typeof j.signalling.host === 'string') ? j.signalling : null;
             if (Array.isArray(j.iceServers) && j.iceServers.length) return j.iceServers;
         } catch (e) { C.relay = false; }
         return FALLBACK_ICE;
@@ -60,7 +70,7 @@
     // ---------- UI hooks (see the #convDialog and #convBar markup in index.html) ----------
     function status(text, kind) {
         const el = document.getElementById('convStatus');
-        if (el) { el.textContent = text; el.dataset.kind = kind || ''; }
+        if (el) { el.textContent = t(text); el.dataset.kind = kind || ''; } // in the user's language (language.js)
         updateBar();
     }
     function updateBar() {
@@ -70,7 +80,7 @@
         const label = document.getElementById('convBarLabel');
         if (label) {
             label.textContent = C.connected ? C.partnerName
-                : (C.role === 'host' ? 'Waiting for someone to join…' : 'Connecting…');
+                : t(C.role === 'host' ? 'Waiting for someone to join…' : 'Connecting…');
         }
         bar.dataset.state = C.connected ? 'on' : 'waiting';
         if (typeof toggleChatInterface === 'function') toggleChatInterface(chatShouldShow());
@@ -87,26 +97,41 @@
     C.start = async function () {
         if (C.active && C.role === 'host') { openDialog('invite'); return; }
         if (C.active) C.end();
-        C.role = 'host'; C.ended = false; C.code = randomCode(8); C.token = ''; C.partnerName = '';
+        C.role = 'host'; C.ended = false; C.code = randomCode(8); C.token = ''; C.partnerName = ''; C.retries = 0;
         openDialog('invite');
         status('Getting a link…');
         const config = { iceServers: await iceServers() };
         if (C.ended) return;
-        C.peer = new Peer(ID_PREFIX + C.code, { config, debug: 0 });
-        C.peer.on('open', () => { showInvite(); status('Waiting for someone to join…'); });
-        C.peer.on('connection', onIncoming);
-        C.peer.on('disconnected', () => { if (!C.ended && C.peer && !C.peer.destroyed) C.peer.reconnect(); });
-        C.peer.on('error', err => {
-            if (err.type === 'unavailable-id') { C.end(); C.start(); return; } // code already taken: new one
-            status(err.type === 'network' || err.type === 'server-error' ? 'No internet connection. Trying again…' : 'Connection problem (' + err.type + ')', 'bad');
-        });
+        openHost(config);
     };
+
+    // The host's side, under this conversation's code. If the service can't be reached it tries again (3, 6, 12,
+    // 24, 30 s) with the same code, so a link already sent still works. (It used to wait for ever.)
+    function openHost(config) {
+        clearTimeout(C.retryTimer);
+        if (C.ended || C.role !== 'host') return;
+        const peer = C.peer = new Peer(ID_PREFIX + C.code, peerOptions(config));
+        peer.on('open', () => { C.retries = 0; showInvite(); status('Waiting for someone to join…'); });
+        peer.on('connection', onIncoming);
+        peer.on('disconnected', () => { if (!C.ended && C.peer === peer && !peer.destroyed) peer.reconnect(); });
+        peer.on('error', err => {
+            if (C.ended || C.peer !== peer) return;
+            if (err.type === 'unavailable-id') { C.end(); C.start(); return; } // code already taken: new one
+            const unreachable = ['network', 'server-error', 'socket-error', 'socket-closed'].includes(err.type);
+            status(unreachable ? networkMessage() : t('Connection problem ({type})', { type: err.type }), 'bad');
+            if (unreachable && !peer.open) { // never got through: start again
+                try { peer.destroy(); } catch (e) {}
+                C.retries = (C.retries || 0) + 1;
+                C.retryTimer = setTimeout(() => openHost(config), Math.min(30000, 3000 * Math.pow(2, C.retries - 1)));
+            }
+        });
+    }
 
     function onIncoming(c) {
         c.on('data', msg => {
             if (!msg || typeof msg !== 'object') return;
             if (msg.t === 'hello') {
-                const name = String(msg.name || 'Someone').slice(0, 40);
+                const name = String(msg.name || t('Someone')).slice(0, 40);
                 if (C.connected && c !== C.conn) { c.send({ t: 'busy' }); setTimeout(() => c.close(), 300); return; }
                 if (C.token && msg.token === C.token) { accept(c, name); return; } // allowed before: reconnecting
                 askToAllow(name, () => accept(c, name), () => { c.send({ t: 'declined' }); setTimeout(() => c.close(), 300); });
@@ -117,13 +142,13 @@
         c.on('close', () => {
             if (c !== C.conn || C.ended) return;
             C.conn = null;
-            status(C.partnerName + ' disconnected. Waiting for them to come back…', 'bad');
+            status(t('{name} disconnected. Waiting for them to come back…', { name: C.partnerName }), 'bad');
         });
     }
 
     function askToAllow(name, yes, no) {
-        if (typeof speak === 'function' && params && params.readPartnerAloud) speak(name + ' wants to join.', true);
-        askConfirm({ title: 'Someone wants to join', message: name + ' wants to join your conversation.', ok: 'Allow', cancel: 'Decline' })
+        if (typeof speak === 'function' && params && params.readPartnerAloud) speak(t('{name} wants to join.', { name }), true);
+        askConfirm({ title: 'Someone wants to join', message: t('{name} wants to join your conversation.', { name }), ok: 'Allow', cancel: 'Decline' })
             .then(allowed => (allowed ? yes() : no()));
     }
 
@@ -132,8 +157,8 @@
         C.conn = c; C.partnerName = name;
         c.send({ t: 'accepted', token: C.token, name: myName() });
         closeDialog();
-        status('Connected to ' + name, 'ok');
-        notify('success', name + ' joined the conversation.');
+        status(t('Connected to {name}', { name }), 'ok');
+        notify('success', t('{name} joined the conversation.', { name }));
     }
 
     // ---------- Guest: join someone's conversation from TexCom ----------
@@ -145,7 +170,7 @@
         status('Connecting…');
         const config = { iceServers: await iceServers() };
         if (C.ended) return false;
-        C.peer = new Peer({ config, debug: 0 });
+        C.peer = new Peer(peerOptions(config));
         C.peer.on('open', connectToHost);
         C.peer.on('disconnected', () => { if (!C.ended && C.peer && !C.peer.destroyed) C.peer.reconnect(); });
         C.peer.on('error', err => {
@@ -153,9 +178,9 @@
             if (err.type === 'peer-unavailable' && !C.token && (C.retries || 0) >= 4) { // old link, never let in: stop
                 C.end(true); openDialog('join'); status('That conversation isn’t open. Ask for a new link.', 'bad'); return;
             }
-            status(err.type === 'peer-unavailable' ? 'That conversation isn’t open. Trying again…'
-                : err.type === 'network' || err.type === 'server-error' ? 'No internet connection. Trying again…'
-                : 'Connection problem (' + err.type + '). Trying again…', 'bad');
+            status(err.type === 'peer-unavailable' ? t('That conversation isn’t open. Trying again…')
+                : ['network', 'server-error', 'socket-error', 'socket-closed'].includes(err.type) ? networkMessage()
+                : t('Connection problem ({type}). Trying again…', { type: err.type }), 'bad');
             retryLater();
         });
         return true;
@@ -180,9 +205,9 @@
         c.on('data', msg => {
             if (!msg || typeof msg !== 'object') return;
             if (msg.t === 'accepted') {
-                C.token = msg.token || ''; C.partnerName = String(msg.name || 'Partner').slice(0, 40); C.conn = c;
-                closeDialog(); status('Connected to ' + C.partnerName, 'ok');
-                notify('success', 'You joined ' + C.partnerName + '’s conversation.');
+                C.token = msg.token || ''; C.partnerName = String(msg.name || t('Partner')).slice(0, 40); C.conn = c;
+                closeDialog(); status(t('Connected to {name}', { name: C.partnerName }), 'ok');
+                notify('success', t('You joined {name}’s conversation.', { name: C.partnerName }));
             } else if (msg.t === 'declined') { C.end(true); notify('failure', 'They didn’t let you join.'); }
             else if (msg.t === 'busy') { C.end(true); notify('failure', 'That conversation already has a partner.'); }
             else if (c === C.conn) onMessage(msg);
@@ -204,7 +229,7 @@
         } else if (msg.t === 'bye') {
             const who = C.partnerName;
             C.end(true);
-            notify('info', (who || 'Your partner') + ' ended the conversation.');
+            notify('info', t('{name} ended the conversation.', { name: who || t('Your partner') }));
         }
     }
 
@@ -254,8 +279,8 @@
 
     C.shareLink = function () {
         const link = inviteLink();
-        const text = myName() + ' would like to chat with you on TexCom: ' + link;
-        if (navigator.share) { navigator.share({ title: 'TexCom conversation', text, url: link }).catch(() => {}); return; }
+        const text = t('{name} would like to chat with you on TexCom:', { name: myName() }) + ' ' + link;
+        if (navigator.share) { navigator.share({ title: t('TexCom conversation'), text, url: link }).catch(() => {}); return; }
         if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom) {
             window.webkit.messageHandlers.TexCom.postMessage({ m: 'ShareText:' + text }); return;
         }
@@ -291,6 +316,7 @@
         window.addEventListener('beforeunload', () => { if (C.connected) try { C.conn.send({ t: 'bye' }); } catch (e) {} });
     });
 
+    window.addEventListener('texcom-ui-text', () => { if (!C.ended) updateBar(); }); // language changed
     window.startConversation = () => C.start();
     window.openJoinConversation = () => openDialog('join');
 })();

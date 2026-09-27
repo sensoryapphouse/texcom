@@ -28,7 +28,7 @@ async function re(o, e = {}) {
     redirect: "error",
     ...r });
 
-  if (!m.ok)
+  if (!m.ok && !(m.status === 0 && location.protocol === "file:")) // TexCom: in the apps the files are read from file://, status 0
   throw new Error("Failed to load Emojibase dataset.");
   const h = await m.json();
   try {

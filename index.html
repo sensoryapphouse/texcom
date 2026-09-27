@@ -48,22 +48,13 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
-    <script src="libraries/tinycolor-min.js"></script>
-    <script src="libraries/dat.gui.min.js" type="text/javascript"></script>
-    <script src="libraries/recorder.js"></script>
     <script src="libraries/slip.js"></script>
-    <script src="gamepads.js"></script>
-    <script src="idb-keyval-iife.js"></script>
    <link rel="stylesheet" type="text/css" href="slip.css">
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="libraries/notiflix-confirm-aio-3.2.5.min.js"></script>
     <script src="libraries/notiflix-loading-aio-3.2.5.min.js"></script>
     <script src="libraries/notiflix-notify-aio-3.2.5.min.js"></script> <!-- used for "Communicator Loaded!" etc.; was never loaded -->
     <script src="libraries/peerjs.min.js"></script>
     <script src="libraries/qrcode.min.js"></script>
-    <link href="MarcTooltips.css" rel="stylesheet">
-    <script src="libraries/MarcTooltips.js"></script>
-    <!--    <link rel="stylesheet" type="text/css" href="dat-gui-font.css">-->
     <link rel="stylesheet" href="libraries/picmo/picmostyles.css" />
     <script type="module" src="libraries/picmo/popup.js"></script>
 
@@ -103,38 +94,38 @@
         </div>
         <!-- Help (texcomhelp.html) in a panel over TexCom, so there is always a way back -->
         <div id="helpOverlay" class="help-overlay" hidden>
-            <div class="help-box" role="dialog" aria-modal="true" aria-label="TexCom Help">
-                <div class="help-bar"><span class="help-title">Help</span><button id="helpClose" class="help-close" type="button" aria-label="Close help">✕</button></div>
-                <iframe id="helpFrame" title="TexCom Help"></iframe>
+            <div class="help-box" role="dialog" aria-modal="true" aria-label="TexCom Help" data-t-attrs="aria-label">
+                <div class="help-bar"><span class="help-title" data-t>Help</span><button id="helpClose" class="help-close" type="button" aria-label="Close help" data-t-attrs="aria-label">✕</button></div>
+                <iframe id="helpFrame" title="TexCom Help" data-t-attrs="title"></iframe>
             </div>
         </div>
         <!-- Conversation over the internet (conversation.js): invite someone, or join someone's conversation -->
         <div id="convDialog" class="conv-overlay" hidden>
             <div class="conv-box" role="dialog" aria-modal="true" aria-labelledby="convTitle">
-                <h2 id="convTitle" class="conv-title"><span data-show="invite">Start a conversation</span><span data-show="join">Join a conversation</span></h2>
+                <h2 id="convTitle" class="conv-title"><span data-show="invite" data-t>Start a conversation</span><span data-show="join" data-t>Join a conversation</span></h2>
                 <div data-show="invite">
-                    <p class="conv-note">Send this link to the person you want to talk to, or let them scan the code. They can use any phone or computer, or their own TexCom.</p>
+                    <p class="conv-note" data-t>Send this link to the person you want to talk to, or let them scan the code. They can use any phone or computer, or their own TexCom.</p>
                     <div id="convQR" class="conv-qr" aria-hidden="true"></div>
-                    <p class="conv-code-row">Code: <strong id="convCode"></strong></p>
+                    <p class="conv-code-row"><span data-t>Code:</span> <strong id="convCode"></strong></p>
                     <p id="convLink" class="conv-link"></p>
                     <div class="conv-buttons">
-                        <button id="convShare" class="conv-btn primary" type="button">Share link…</button>
-                        <button id="convCopy" class="conv-btn" type="button">Copy link</button>
+                        <button id="convShare" class="conv-btn primary" type="button" data-t>Share link…</button>
+                        <button id="convCopy" class="conv-btn" type="button" data-t>Copy link</button>
                     </div>
                 </div>
                 <div data-show="join">
-                    <p class="conv-note">Paste the link you were sent, or type the code.</p>
-                    <label for="convJoinInput" class="conv-label">Link or code</label>
-                    <input id="convJoinInput" class="conv-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. k7m2 qx9p">
+                    <p class="conv-note" data-t>Paste the link you were sent, or type the code.</p>
+                    <label for="convJoinInput" class="conv-label" data-t>Link or code</label>
+                    <input id="convJoinInput" class="conv-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. k7m2 qx9p" data-t-attrs="placeholder">
                     <div class="conv-buttons">
-                        <button id="convJoinGo" class="conv-btn primary" type="button">Join</button>
-                        <button id="convJoinCancel" class="conv-btn" type="button">Cancel</button>
+                        <button id="convJoinGo" class="conv-btn primary" type="button" data-t>Join</button>
+                        <button id="convJoinCancel" class="conv-btn" type="button" data-t>Cancel</button>
                     </div>
                 </div>
                 <p id="convStatus" class="conv-status" role="status"></p>
                 <div class="conv-buttons" data-show="invite">
-                    <button id="convClose" class="conv-btn" type="button">Close (keep waiting)</button>
-                    <button id="convEndInvite" class="conv-btn danger" type="button">End</button>
+                    <button id="convClose" class="conv-btn" type="button" data-t>Close (keep waiting)</button>
+                    <button id="convEndInvite" class="conv-btn danger" type="button" data-t>End</button>
                 </div>
             </div>
         </div>
@@ -142,21 +133,6 @@
         
 
         <!--    <div id="scroll">-->
-        
-
-        
-
-        <!--        <div id="listCat" class="check-list">-->
-        <ul id="listCat" class="check-list">
-            <!--<li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>
-            <li><input type="checkbox" />Apple </li>-->
-        </ul>
-        <!--        </div>-->
 
         
     
@@ -169,15 +145,15 @@
     <div id="leftPane" style="display: flex; flex-direction: column; padding: 40px 10px 10px 10px; box-sizing: border-box; background: var(--bg-panel); overflow: hidden; position: relative;">
         
         <btn id="theCategories" enabled style="display: none;">Categories: All ⏩</btn>
-        <h2 style="margin: 0 0 10px 0; font-size: 2.5vh; color: var(--accent); flex-shrink: 0;">Categories</h2>
+        <h2 style="margin: 0 0 10px 0; font-size: 2.5vh; color: var(--accent); flex-shrink: 0;" data-t>Categories</h2>
         <ul id="categoryList" class="slippylist" style="flex: 1; overflow-y: auto; margin-bottom: 15px; font-size: 2.5vh;">
             <li class="demo-no-reorder"><span style="font-size:3.5vh;">🔷&#8201;</span> All</li>
         </ul>
         
         <!-- Chat history (Settings > Smart AI > Show chat history). The divider resizes it; it has no heading. -->
-        <div id="convBar" class="conv-bar" hidden><span class="conv-dot" aria-hidden="true"></span><span id="convBarLabel" class="conv-bar-label"></span><button id="convBarInvite" class="conv-bar-btn" type="button">Link</button><button id="convBarEnd" class="conv-bar-btn danger" type="button">End</button></div>
-        <div id="chatDivider" role="separator" aria-orientation="horizontal" aria-label="Resize chat history" aria-controls="chatHistoryContainer" tabindex="0" hidden></div>
-        <div id="chatHistoryContainer" role="log" aria-label="Chat history" hidden></div>
+        <div id="convBar" class="conv-bar" hidden><span class="conv-dot" aria-hidden="true"></span><span id="convBarLabel" class="conv-bar-label"></span><button id="convBarInvite" class="conv-bar-btn" type="button" data-t>Link</button><button id="convBarEnd" class="conv-bar-btn danger" type="button" data-t>End</button></div>
+        <div id="chatDivider" role="separator" aria-orientation="horizontal" aria-label="Resize chat history" aria-controls="chatHistoryContainer" tabindex="0" hidden data-t-attrs="aria-label"></div>
+        <div id="chatHistoryContainer" role="log" aria-label="Chat history" hidden data-t-attrs="aria-label"></div>
         
         <!-- AI AutoReply Box stacked vertically -->
         
@@ -185,34 +161,34 @@
 
     <!-- RIGHT PANE -->
     <div id="paneResizer" class="pane-resizer" style="z-index: 5000; cursor: col-resize; display: block;"></div>
-<div id="topToolbar" role="toolbar" aria-label="Actions">
-            <span id="tbTitle" class="tb-title" aria-hidden="true">TexCom</span> <!-- shown only when every button fits (layoutToolbar) -->
-            <button id="clearButton" class="action-btn" title="Clear" aria-label="Clear"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-            <button id="undoButton" class="action-btn" title="Undo" aria-label="Undo"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
-            <button id="redoButton" class="action-btn" title="Redo" aria-label="Redo"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
+<div id="topToolbar" role="toolbar" aria-label="Actions" data-t-attrs="aria-label">
+            <span id="tbTitle" class="tb-title" aria-hidden="true" data-t>TexCom</span> <!-- shown only when every button fits (layoutToolbar) -->
+            <button id="clearButton" class="action-btn" title="Clear" aria-label="Clear" data-t-attrs="title aria-label"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            <button id="undoButton" class="action-btn" title="Undo" aria-label="Undo" data-t-attrs="title aria-label"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg></button>
+            <button id="redoButton" class="action-btn" title="Redo" aria-label="Redo" data-t-attrs="title aria-label"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg></button>
             <button id="micButton" class="action-btn" data-group-start title="Listen to partner" aria-label="Listen to partner" aria-pressed="false" hidden><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg></button>
-            <button id="bellButton" class="action-btn" title="Alert" aria-label="Alert"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></button>
-            <button id="noButton" class="action-btn" title="No" aria-label="No"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-            <button id="yesButton" class="action-btn" title="Yes" aria-label="Yes"><svg style="color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></button>
-            <button id="sosButton" class="action-btn" title="SOS" aria-label="SOS"><span class="sos-text" style="color: #ef4444; font-weight: bold;">SOS</span></button>
-            <button id="favButton" class="action-btn" title="Favourite" aria-label="Favourite"><svg style="color: #eab308;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
+            <button id="bellButton" class="action-btn" title="Alert" aria-label="Alert" data-t-attrs="title aria-label"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></button>
+            <button id="noButton" class="action-btn" title="No" aria-label="No" data-t-attrs="title aria-label"><svg style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <button id="yesButton" class="action-btn" title="Yes" aria-label="Yes" data-t-attrs="title aria-label"><svg style="color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></button>
+            <button id="sosButton" class="action-btn" title="SOS" aria-label="SOS" data-t-attrs="title aria-label"><span class="sos-text" style="color: #ef4444; font-weight: bold;" data-t>SOS</span></button>
+            <button id="favButton" class="action-btn" title="Favourite" aria-label="Favourite" data-t-attrs="title aria-label"><svg style="color: #eab308;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg></button>
             <button id="editButton" class="action-btn" title="Edit phrases" aria-label="Edit phrases" aria-pressed="false"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.232-6.232a2.5 2.5 0 113.536 3.536L12.536 16.536 8 17.5l.964-4.5z M5 19h14"></path></svg></button>
-            <button id="settingsButton" class="action-btn" title="Settings" aria-label="Settings"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-            <button id="uploadButton" class="action-btn" title="Share" aria-label="Share"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></button>
-            <button id="moreButton" class="action-btn" title="More" aria-label="More" aria-haspopup="menu" aria-expanded="false" hidden><svg fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+            <button id="settingsButton" class="action-btn" title="Settings" aria-label="Settings" data-t-attrs="title aria-label"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+            <button id="uploadButton" class="action-btn" title="Share" aria-label="Share" data-t-attrs="title aria-label"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></button>
+            <button id="moreButton" class="action-btn" title="More" aria-label="More" aria-haspopup="menu" aria-expanded="false" hidden data-t-attrs="title aria-label"><svg fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
         </div>
         
         <div id="rightPane" style="display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; overflow: hidden; position: relative;">
 <div class="text-speak-row" style="display: flex; gap: 10px; flex-shrink: 0; margin-bottom: 10px; height: 15vh;">
-            <textarea id="theText" placeholder="Text to speak or search." enabled style="flex: 1; border-radius: var(--btn-radius); padding: 10px; font-size: 3vh; border: 2px solid var(--border-color); resize: none; outline: none; background: #fef08a; color: #1f2937;"></textarea>
+            <textarea id="theText" dir="auto" placeholder="Text to speak or search." enabled style="flex: 1; border-radius: var(--btn-radius); padding: 10px; font-size: 3vh; border: 2px solid var(--border-color); resize: none; outline: none; background: #fef08a; color: #1f2937;" data-t-attrs="placeholder"></textarea>
             <button id="speakButton" class="action-btn" style="background-color: var(--accent); color: var(--accent-text); border: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: var(--btn-radius); cursor: pointer;">
                 <svg style="width: 6vh; height: 6vh; color: var(--accent-text); margin-bottom: 5px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <span style="font-size: 2.5vh; font-weight: bold;">Speak</span>
+                <span style="font-size: 2.5vh; font-weight: bold;" data-t>Speak</span>
             </button>
         </div>
         
         <!-- No Search box: the text box searches (the words after its last punctuation). This line shows only while it does. -->
-        <div id="filterInfo" class="filter-info" role="status" hidden><span id="filterInfoText"></span><button id="filterClear" class="filter-clear" type="button" aria-label="Show all phrases">✕</button></div>
+        <div id="filterInfo" class="filter-info" role="status" hidden><span id="filterInfoText"></span><button id="filterClear" class="filter-clear" type="button" aria-label="Show all phrases" data-t-attrs="aria-label">✕</button></div>
         
         <div id="aiPredictionBox" style="display: none; min-height: 4vh; padding: 4px 0; width: 100%; align-items: center; justify-content: flex-start; gap: 8px; z-index: 1000; overflow-x: auto; white-space: nowrap; margin-bottom: 10px; flex-shrink: 0;">
             <button class="ai-predict-btn" style="flex: 0 0 auto; height: auto;  border-radius: 999px; border: 1px solid #3b82f6; background: #eff6ff; font-size: 2vh; color: #1d4ed8; cursor: pointer; display: none; padding: 6px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;"></button>
@@ -224,48 +200,45 @@
     </div>
 </div>
 <div id="moreMenu" role="menu" hidden></div>
-<buttonPanel class="btn" enabled hidden></buttonPanel>
         <button id="trigger" hidden></button>
 
         <script src="versions.js"></script>
+        <script src="languages-list.js"></script>
+        <script src="phrase-store.js"></script>
+        <script src="language.js"></script>
         <script src="settings.js"></script>
-        <script src="gpad.js"></script>
-        <script src="panel.js"></script>
-        <script src="languages.js"></script>
-        <script src="record.js"></script>
+        <script src="state.js"></script>
         <script src="audio.js"></script>
         <script src="partner-link.js"></script>
     <script src="conversation.js"></script>
-        <script src="sketch2.js?1789976789"></script>
+        <script src="sketch2.js"></script>
         <script src="editor.js"></script>
         <input type="file" id="file-input" hidden accept=".json">
         <input type="file" id="text-input" hidden accept=".txt">
-        <input type="file" id="image-input" hidden accept="image/*">
-        <input type="file" id="sound-input" hidden accept="audio/*">
         
     
     <div id="itemEditorOverlay" hidden>
         <div id="itemEditor" role="dialog" aria-modal="true" aria-labelledby="edTitle">
             <div class="settings-header">
                 <h2 id="edTitle">Edit phrase</h2>
-                <button type="button" class="close-settings-btn" id="edClose" aria-label="Cancel">✖</button>
+                <button type="button" class="close-settings-btn" id="edClose" aria-label="Cancel" data-t-attrs="aria-label">✖</button>
             </div>
-            <label class="ed-field"><span>Text</span><input id="edText" type="text" autocomplete="off"></label>
+            <label class="ed-field"><span data-t>Text</span><input id="edText" type="text" autocomplete="off"></label>
             <p id="edError" class="ed-error" role="alert" hidden></p>
             <div class="ed-inline">
-                <label class="ed-field ed-emoji"><span>Symbol</span><input id="edEmoji" type="text" maxlength="16" autocomplete="off"></label>
-                <button type="button" id="edEmojiPick" class="settings-action-btn">Choose…</button>
+                <label class="ed-field ed-emoji"><span data-t>Symbol</span><input id="edEmoji" type="text" maxlength="16" autocomplete="off"></label>
+                <button type="button" id="edEmojiPick" class="settings-action-btn" data-t>Choose…</button>
             </div>
-            <label class="ed-field" data-for="phrase"><span>Shortcut (type it, then /)</span><input id="edAbbrev" type="text" autocomplete="off"></label>
-            <fieldset class="ed-cats" data-for="phrase"><legend>Categories</legend><div id="edCats"></div></fieldset>
-            <label class="ed-check" data-for="phrase"><input type="checkbox" id="edInstant"> <span>Instant message (speak as soon as it's tapped)</span></label>
-            <label class="ed-check"><input type="checkbox" id="edFixed"> <span>Keep in a fixed position</span></label>
-            <label class="ed-check"><input type="checkbox" id="edDeletable"> <span>Allow it to be deleted</span></label>
+            <label class="ed-field" data-for="phrase"><span data-t>Shortcut (type it, then /)</span><input id="edAbbrev" type="text" autocomplete="off"></label>
+            <fieldset class="ed-cats" data-for="phrase"><legend data-t>Categories</legend><div id="edCats"></div></fieldset>
+            <label class="ed-check" data-for="phrase"><input type="checkbox" id="edInstant"> <span data-t>Instant message (speak as soon as it's tapped)</span></label>
+            <label class="ed-check"><input type="checkbox" id="edFixed"> <span data-t>Keep in a fixed position</span></label>
+            <label class="ed-check"><input type="checkbox" id="edDeletable"> <span data-t>Allow it to be deleted</span></label>
             <div class="ed-actions">
-                <button type="button" id="edDelete" class="ed-btn ed-danger">Delete</button>
+                <button type="button" id="edDelete" class="ed-btn ed-danger" data-t>Delete</button>
                 <span class="ed-spacer"></span>
-                <button type="button" id="edCancel" class="ed-btn">Cancel</button>
-                <button type="button" id="edSave" class="ed-btn ed-primary">Save</button>
+                <button type="button" id="edCancel" class="ed-btn" data-t>Cancel</button>
+                <button type="button" id="edSave" class="ed-btn ed-primary" data-t>Save</button>
             </div>
         </div>
     </div>
@@ -273,8 +246,8 @@
     <div id="settingsOverlay">
         <div id="customSettingsPanel">
             <div class="settings-header">
-                <h2>Settings</h2>
-                <button type="button" class="close-settings-btn" onclick="toggleSettings()">✖</button>
+                <h2 data-t>Settings</h2>
+                <button type="button" class="close-settings-btn" onclick="toggleSettings()" aria-label="Close settings" data-t-attrs="aria-label">✖</button>
             </div>
             <div class="settings-content" id="settingsContent">
                 <!-- Settings will be injected here by settings.js -->

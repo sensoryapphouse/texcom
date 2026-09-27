@@ -39,7 +39,7 @@ function openItemEditor(state) {
     const item = state.isNew ? null : (isPhrase ? manifestInfo.messages[state.index] : manifestInfo.categories[state.index]);
 
     document.getElementById('edTitle').textContent =
-        (state.isNew ? 'New ' : 'Edit ') + (isPhrase ? 'phrase' : 'category');
+        state.isNew ? (isPhrase ? t('New phrase') : t('New category')) : (isPhrase ? t('Edit phrase') : t('Edit category'));
     document.getElementById('edText').value = item ? item.name.trim() : '';
     document.getElementById('edEmoji').value = item ? (item.emoji || '').trim() : '';
     document.getElementById('edAbbrev').value = item && item.abbreviation ? item.abbreviation.trim() : '';
@@ -54,7 +54,7 @@ function openItemEditor(state) {
         const box = document.getElementById('edCats');
         box.innerHTML = '';
         // Default categories for a new phrase: the current category (if it's a real one)
-        let current = (categoryName && categoryName !== 'All') ? categoryName : '';
+        let current = (categoryName && categoryName !== allCategoryName()) ? categoryName : '';
         for (let i = 1; i < manifestInfo.categories.length; i++) {
             const name = manifestInfo.categories[i].name;
             const checked = item ? item.categories.includes('[' + name + ']') : (name === current);
@@ -99,7 +99,7 @@ function saveItemEditor() {
     const name = document.getElementById('edText').value.trim();
     if (!name) {
         const err = document.getElementById('edError');
-        err.textContent = 'Please enter some text.';
+        err.textContent = t('Please enter some text.');
         err.hidden = false;
         document.getElementById('edText').focus();
         return;
@@ -123,6 +123,10 @@ function saveItemEditor() {
     }
 
     const item = items[index];
+    if (isPhrase && !s.isNew) {
+        if (item.name.trim() !== name) rememberUserChange(item.name); // updates never bring back the old wording
+        item.userEdited = true;                                        // nor alter this phrase
+    }
     if (!isPhrase && item.name !== name) {
         // Renaming a category: update every phrase that belongs to it
         manifestInfo.messages.forEach(m => { m.categories = m.categories.replace('[' + item.name + ']', '[' + name + ']'); });
@@ -152,7 +156,8 @@ function deleteFromEditor() {
     const items = isPhrase ? manifestInfo.messages : manifestInfo.categories;
     const name = items[s.index].name;
     const doDelete = () => {
-        if (!isPhrase && categoryName === name) categoryName = 'All';
+        if (isPhrase) rememberUserChange(name); // a deleted phrase is never offered again as a "new" phrase
+        if (!isPhrase && categoryName === name) categoryName = allCategoryName();
         items.splice(s.index, 1);
         s.li.remove();
         saveToLocalStorage();
@@ -160,7 +165,7 @@ function deleteFromEditor() {
         closeItemEditor();
         afterListChange();
     };
-    askConfirm({ title: 'Delete', message: 'Delete “' + name + '”?', ok: 'Delete', cancel: 'Keep', danger: true })
+    askConfirm({ title: 'Delete', message: t('Delete “{name}”?', { name }), ok: 'Delete', cancel: 'Keep', danger: true })
         .then(yes => { if (yes) doDelete(); });
 }
 
@@ -178,7 +183,7 @@ function setEditing(on) {
     const b = document.getElementById('editButton');
     if (b) {
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        b.title = on ? 'Done editing' : 'Edit phrases';
+        b.title = t(on ? 'Done editing' : 'Edit phrases');
         b.setAttribute('aria-label', b.title);
     }
     refreshEditDecorations();
@@ -195,7 +200,7 @@ function refreshEditDecorations() {
             add = document.createElement('li');
             add.className = 'ed-add demo-no-swipe demo-no-reorder';
             add.dataset.kind = kind;
-            add.innerHTML = '<span>➕</span> &#8201' + label;
+            add.innerHTML = '<span>➕</span> &#8201' + escapeHTML(t(label));
             list.insertBefore(add, list.firstChild);
         } else if (!on && add) {
             add.remove();
@@ -209,7 +214,7 @@ function refreshEditDecorations() {
                 pen = document.createElement('button');
                 pen.type = 'button';
                 pen.className = 'ed-pencil';
-                pen.setAttribute('aria-label', 'Edit');
+                pen.setAttribute('aria-label', t('Edit'));
                 li.appendChild(pen);
             } else if (!editable && pen) {
                 pen.remove();
@@ -233,16 +238,11 @@ document.addEventListener('DOMContentLoaded', function () {
         else if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text') { e.preventDefault(); saveItemEditor(); }
     });
     // Optional emoji picker (needs internet for its emoji data); typing in the field always works
-    document.getElementById('edEmojiPick').addEventListener('click', () => {
-        const trigger = document.getElementById('trigger');
-        if (!trigger) return;
+    document.getElementById('edEmojiPick').addEventListener('click', function () {
+        if (typeof openEmojiPicker !== 'function') return;
         if (window.__savedBtnEmoji === undefined) window.__savedBtnEmoji = window.btnEmoji;
         window.btnEmoji = document.getElementById('edEmoji');
-        const r = document.getElementById('edEmojiPick').getBoundingClientRect();
-        Object.assign(trigger.style, { position: 'fixed', left: r.left + 'px', top: r.bottom + 'px', width: '1px', height: '1px' });
-        trigger.hidden = false;
-        trigger.click();
-        trigger.hidden = true;
+        openEmojiPicker(this, window.btnEmoji);
     });
 
     // Pencil buttons: remember the press so the list's own tap handler ignores it
@@ -260,4 +260,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const editButton = document.getElementById('editButton');
     if (editButton) editButton.addEventListener('click', () => setEditing(!isEditing()));
+    setEditing(false); // its label, in the user's language
+    window.addEventListener('texcom-ui-text', () => { // language changed: relabel the Edit button and the "+ Add" rows
+        document.querySelectorAll('.ed-add').forEach(a => a.remove());
+        setEditing(isEditing());
+    });
 });

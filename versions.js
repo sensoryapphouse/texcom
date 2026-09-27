@@ -1,5 +1,5 @@
 var freeVersion = false;
-var version = "V1.0.8 - 27-9-23";//added file name define in Share/Save and also retain Saved template in app
+var version = "2026-09-27-f29a219"; // the published web version: scripts/build_web.py stamps <date>-<commit> here
 var testing = false;
 var isChromium = navigator.userAgent.includes("Chrome");
 var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;

@@ -58,6 +58,8 @@ function getFullPersona() {
     }
     
     if(params.userPersona && params.userPersona.trim().length > 0) p.push("Custom Details: " + params.userPersona.trim());
+    // Replies in the user's language (Settings > General > Language)
+    if (typeof currentLanguage === 'function' && currentLanguage() !== 'en') p.push("Language: write every suggestion in " + texcomLanguage(currentLanguage()).english);
     
     // Inject Rolling Chat History Context for better AI awareness
     if (window.rollingChatHistory && window.rollingChatHistory.length > 0) {
@@ -149,27 +151,8 @@ Replace [***] with name
 
 var autoPredict = -1;
 var filterPredict = "";
-var btnFlip = document.getElementById('flip');
 var tmrKeys = null;
 var helpSplash;
-var PopupMenu, PopupMenuItem, PopupMenuPosition;
-import('./libraries/popup-menu.js').then(module => {
-    PopupMenu = module.default;
-    PopupMenuItem = module.PopupMenuItem;
-    PopupMenuPosition = module.PopupMenuPosition;
-    
-    itemList = [
-        new PopupMenuItem("Edit", 'Edit', './images/edit.svg'),
-        new PopupMenuItem("Add", 'Add new entry', './images/add.svg'),
-        new PopupMenuItem("Delete", 'Delete', './images/delete.svg'),
-    ];
-
-    itemListNoDelete = [
-        new PopupMenuItem("Edit", 'Edit', './images/edit.svg'),
-        new PopupMenuItem("Add", 'Add new entry', './images/add.svg')
-    ];
-});
-
 document.body.addEventListener("wheel", e=>{
   if(e.ctrlKey)
     e.preventDefault();//prevent zoom
@@ -181,19 +164,19 @@ document.body.addEventListener("wheel", e=>{
 
 function updateCategoriesButton() {
     if (freeVersion) {
-        theCategoriesButton.innerHTML = "Phrase List";
+        theCategoriesButton.textContent = t("Phrase List");
         theCategoriesButton.style.textAlign = "center";
         return;
     }
     let isLargeLandscape = !smallPortrait;
     if (smallPortrait || isLargeLandscape) {
         if (categoryList.hidden)
-            theCategoriesButton.innerHTML = "Categories: " + categoryName + " ⏩"; // 🔽
+            theCategoriesButton.textContent = t('Categories: {name}', { name: categoryName }) + " ⏩";
         else
-            theCategoriesButton.innerHTML = "Categories: " + categoryName + "  🔼";
+            theCategoriesButton.textContent = t('Categories: {name}', { name: categoryName }) + "  🔼";
         theCategoriesButton.style.textAlign = "center";
     } else {
-        theCategoriesButton.innerHTML = "Categories: " + categoryName + " ⏩";
+        theCategoriesButton.textContent = t('Categories: {name}', { name: categoryName }) + " ⏩";
         theCategoriesButton.style.textAlign = "center";
     }
 }
@@ -234,22 +217,30 @@ function updateUndoButtons() {
     }
 }
 
+// The text box after a phrase, Speak, Clear, Undo…: back in it for more typing, but on a touch screen only if the
+// person was typing (the keyboard used to come up after every phrase tapped, covering half the phrases)
+let textBoxHadFocus = false;
+document.addEventListener('pointerdown', () => { textBoxHadFocus = document.activeElement === document.getElementById('theText'); }, true);
+function focusTextBox() {
+    const box = document.getElementById('theText');
+    if (box && (textBoxHadFocus || window.matchMedia('(pointer: fine)').matches)) box.focus();
+}
+
 function applyHistory() { // put the snapshot we are on into the text box
     theText.value = txHistory[placeInHistory] || "";
     updateUndoButtons();
     if (typeof theText.oninput === 'function') theText.oninput({ stopPropagation: () => {}, key: 'Unidentified' });
-    theText.focus();
+    focusTextBox();
 }
 
 window.onload = () => {
     
 
-    const buttons = ['speakButton', 'undoButton', 'redoButton', 'yesButton', 'noButton', 'sosButton', 'bellButton', 'favButton', 'uploadButton', 'settingsButton', 'clearButton', 'startSplash', 'theCategoriesButton', 'helpSplash', 'btnFlip'];
+    const buttons = ['speakButton', 'undoButton', 'redoButton', 'yesButton', 'noButton', 'sosButton', 'bellButton', 'favButton', 'uploadButton', 'settingsButton', 'clearButton', 'startSplash', 'theCategoriesButton', 'helpSplash'];
     buttons.forEach(id => {
         if(!window[id]) window[id] = document.getElementById(id) || document.createElement('button');
     });
     if(!window.filter) window.filter = document.getElementById('the-filter') || document.createElement('input');
-    if(!window.txtText) window.txtText = document.getElementById('txtText') || document.createElement('input');
 
     // The phrase filter: the words typed after the text box's last punctuation (doPredict). There is no Search box any
     // more; this is a detached field holding the filter text, and #filterInfo shows it while it is in use.
@@ -264,7 +255,6 @@ window.onload = () => {
     window.sosButton = document.getElementById('sosButton');
     window.bellButton = document.getElementById('bellButton');
     window.favButton = document.getElementById('favButton');
-    window.buttonPanel = document.getElementById('buttonPanel');
 
     //    localStorage.clear();
     'use strict';
@@ -288,11 +278,21 @@ window.onload = () => {
     theText = document.getElementById('theText');
     theCategoriesButton = document.getElementById('theCategories');
     categoryList = document.getElementById('categoryList');
-    buttonPanel = document.querySelector('buttonPanel');
-    initLanguages();
 
     theList = document.getElementById('messagesList');
     setupSlip(theList);
+    setupListKeys(theList, 'Phrases');
+    setupListKeys(categoryList, 'Categories');
+    // When the language changes: redo the text set here (the page's fixed text is done by applyUIText)
+    window.addEventListener('texcom-ui-text', () => {
+        theList.setAttribute('aria-label', t('Phrases'));
+        categoryList.setAttribute('aria-label', t('Categories'));
+        updateCategoriesButton();
+        const mic = document.getElementById('micButton');
+        if (mic) setMicButton(mic.getAttribute('aria-pressed') === 'true');
+        if (typeof updateList2 === 'function' && manifestInfo) updateList2(); // the "Matching …" line
+        if (typeof layoutToolbar === 'function') layoutToolbar();             // translated labels change widths
+    });
     setupSlip(categoryList);
 
     // to set all the list to particular class(es)
@@ -332,9 +332,9 @@ window.onload = () => {
         }, 100);
     }
     
-    loadManifest();
+    loadParams(); // the saved language decides which phrases open
+    loadManifest().then(() => { if (!startSplash.hidden) startSplash.onclick(); }); // straight in once the phrases are ready
     smallPortrait = isOneColumnLayout();
-    setUpPanel();
     windowResized();
 
     if(window.clearButton) window.clearButton.onclick = function (e) {
@@ -362,15 +362,12 @@ window.onload = () => {
         theText.value = "";
         let box = document.getElementById('aiPredictionBox');
         if(box) box.style.display = 'none';
-        theText.focus();
+        focusTextBox();
     }
 
     speakButton.onclick = function (e) {
         speak(theText.value);
-        theText.focus();
-    }
-    buttonPanel.onclick = function (e) {
-        //        buttonPanel.hidden = true;
+        focusTextBox();
     }
     undoButton.onclick = function (e) {
         clearTimeout(undoTimer);
@@ -386,10 +383,10 @@ window.onload = () => {
         applyHistory();
     }
     yesButton.onclick = function (e) {
-        speak('Yes');
+        speak(yesWord()); // in the user's language (language.js)
     }
     noButton.onclick = function (e) {
-        speak('No');
+        speak(noWord());
     }
     sosButton.onclick = function (e) {
         console.log("SOS");
@@ -409,8 +406,8 @@ window.onload = () => {
         const key = normPhrase(str);
         const match = manifestInfo.messages.find(m => normPhrase(m.name) === key);
         if (match) {
-            if ((match.categories || '').includes('[Favourites]')) { note('info', 'That’s already in Favourites.'); return; }
-            match.categories = (match.categories || '') + '[Favourites]';
+            if ((match.categories || '').includes(favouritesTag())) { note('info', 'That’s already in Favourites.'); return; }
+            match.categories = (match.categories || '') + favouritesTag();
         } else {
             manifestInfo.messages.unshift({
                 name: str,
@@ -420,7 +417,7 @@ window.onload = () => {
                 fixed: false,
                 abbreviation: '',
                 instant: false,
-                categories: '[Favourites]',
+                categories: favouritesTag(),
                 gotaudio: false,
                 audioData: '',
             });
@@ -443,13 +440,19 @@ window.onload = () => {
     theText.onclick = function (e) {
         mute();
     }
-    theText.onkeydown = function (e) { // stop h key showing menu
+    theText.onkeydown = function (e) { // typing in the text box doesn't reach the page's shortcuts
         e.stopPropagation();
-        if (e.key == "Control") {
-            btnFlip.innerHTML = theText.value;
-            btnFlip.hidden = false;
-        }
     }
+// The app's (ViewController.swift) messages arrive in English and are shown in the language in use; the system's own
+// error descriptions are already in the device's language
+function nativeMessage(message) {
+    const known = {
+        'On-device AI is not available on this device': t('On-device AI isn’t available on this device.'),
+        'On-device AI needs iOS 26 or macOS 26': t('On-device AI needs iOS 26 or macOS 26.'),
+        'No expansion': t('Couldn’t expand that.'),
+    };
+    return known[message] || message;
+}
 window.receiveExpandedText = function(expanded) {
     if(typeof Notiflix !== 'undefined' && Notiflix.Loading) {
         Notiflix.Loading.remove();
@@ -457,7 +460,7 @@ window.receiveExpandedText = function(expanded) {
     
     if (expanded.startsWith("Error:")) {
         if(typeof Notiflix !== 'undefined') {
-            Notiflix.Notify.failure(expanded.replace("Error: ", ""));
+            Notiflix.Notify.failure(nativeMessage(expanded.replace("Error: ", "")));
         } else {
             console.error(expanded);
         }
@@ -466,7 +469,7 @@ window.receiveExpandedText = function(expanded) {
     
     if (theText) {
         theText.value = expanded + " ";
-        theText.focus();
+        focusTextBox();
         theText.selectionStart = theText.value.length;
         theText.selectionEnd = theText.value.length;
         theText.scrollTop = theText.scrollHeight;
@@ -530,7 +533,7 @@ window.receiveAutoReplies = function(repliesString) {
         li.dataset.bools = "fixed no-edit"; // Prevent editing via the menu
         
         // Exact same HTML structure as makeLiText()
-        li.innerHTML = "<span style='font-size:3.3vh;'>🧠</span> &#8201 " + text;
+        li.innerHTML = "<span>🧠</span> &#8201 " + escapeHTML(text);
         
         // Custom click handler to bypass Slip.js array index logic (so we don't corrupt the phrase bank)
         li.onclick = function(e) {
@@ -538,8 +541,10 @@ window.receiveAutoReplies = function(repliesString) {
             e.stopPropagation(); // Stop Slip.js from seeing this click
             let theTextEl = document.getElementById('theText');
             if(theTextEl) {
+                pushHistory(); // the reply replaces the text box: Undo brings back what was there
                 theTextEl.value = text + " ";
-                theTextEl.focus();
+                pushHistory();
+                focusTextBox();
                 // trigger input event so UI updates
                 if(typeof theTextEl.oninput === 'function') theTextEl.oninput({stopPropagation: () => {}, key: 'Unidentified'});
             }
@@ -551,6 +556,9 @@ window.receiveAutoReplies = function(repliesString) {
 };
 
 window.requestContextualPhrases = function() {
+    // Suggested replies come from the apps' on-device AI; a browser has none (it used to show three fixed English
+    // replies, "I agree." and so on, after everything said, in every language)
+    if (!window.deviceSupportsAI) return;
     let historyStr = "";
     if(window.rollingChatHistory && window.rollingChatHistory.length > 0) {
         historyStr = window.rollingChatHistory.map(h => `${h.role}: ${h.text}`).join(" | ");
@@ -571,7 +579,7 @@ window.requestContextualPhrases = function() {
         let li = document.createElement('li');
         li.className = "ai-injected-reply demo-no-swipe demo-no-reorder"; 
         li.dataset.bools = "fixed no-edit";
-        li.innerHTML = "<span style='font-size:3.3vh;'>⏳</span> &#8201 Predicting phrases...";
+        li.innerHTML = "<span>⏳</span> &#8201 " + escapeHTML(t('Predicting phrases…'));
         msgList.insertBefore(li, msgList.firstChild);
     }
     
@@ -585,11 +593,6 @@ window.requestContextualPhrases = function() {
         window.chrome.webview.postMessage(msg);
     } else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) {
         window.AndroidTexCom.postMessage(JSON.stringify({"m": msg}));
-    } else {
-        // Fallback for Web Mode
-        if(typeof receiveAutoReplies === 'function') {
-            receiveAutoReplies("I agree.|Tell me more.|That sounds good.");
-        }
     }
 };
 
@@ -612,7 +615,7 @@ function expandTextWithLLM() {
         }
         
         if(typeof Notiflix !== 'undefined' && Notiflix.Loading) {
-            Notiflix.Loading.pulse('Expanding...');
+            Notiflix.Loading.pulse(t('Expanding…'));
         }
     }
 }
@@ -662,7 +665,7 @@ window.receivePredictions = function(predsString) {
                             window.AndroidTexCom.postMessage(JSON.stringify({"m": msg}));
                         }
                     }
-                    theText.focus();
+                    focusTextBox();
                     theText.selectionStart = theText.value.length;
                     theText.selectionEnd = theText.value.length;
                 }
@@ -733,33 +736,13 @@ window.receivePredictions = function(predsString) {
         }, 500); // 500ms debounce
     };
 
-    theText.onkeyup = function (e) {
+    theText.onkeyup = function (e) { // filtering happens on input (every change, from any keyboard); not here as well
         e.stopPropagation();
-        if (e.key == "Control") {
-            btnFlip.hidden = true;
-        }
-        stopSearch = true;
-        clearTimeout(tmrKeys);
-        tmrKeys = setTimeout(function () {
-            doPredict();
-        }, 200);
         theText.scrollTop = theText.scrollHeight;
     }
     window.addEventListener("resize", windowResized);
-    window.addEventListener("orientationchange", (event) => {
-            switch (window.orientation) {
-                case -90:
-                case 180:
-                    btnFlip.innerHTML = theText.value;
-                    btnFlip.hidden = false;
-                    break;
-                default:
-                    btnFlip.hidden = true;
-                    break;
-            }
-    });
-
     loadParams();
+    if (typeof applyPhraseLanguage === 'function') applyPhraseLanguage(); // <html lang>, and the app's listening language
     setInterval(function () {
         uploadButton.disabled = (theText.value.length == 0); // Share sends the typed text
     }, 300);
@@ -777,41 +760,18 @@ window.receivePredictions = function(predsString) {
             });
     }
 
-    //    document.onkeydown = function (e) {
-    //        if (e.key == "Control") {
-    //            btnFlip.value = theText.value;
-    //            btnFlip.hidden = false;
-    //        }
-    //    }
-    //    document.onkeyup = function (e) {
-    //        if (e.key == "Control") {
-    //            btnFlip.hidden = true;
-    //        }
-    //    }
 }
 
+// The phrases are filtered by the words typed since the last punctuation mark (so a finished sentence stops
+// filtering). Punctuation in every script TexCom has phrases for: Arabic ؟ ، ؛, CJK 。？！，、, Hindi । ॥, Burmese ။ …
+const SENTENCE_BREAK = /[.?!,:;¿¡…。？！，、؟،؛۔।॥။၊።፣፤]/g;
 function doPredict() {
     stopSearch = false;
     let s = theText.value;
-    autoPredict = s.lastIndexOf(".");
-    let result2 = s.lastIndexOf("?");
-    if (result2 > autoPredict)
-        autoPredict = result2;
-    result2 = s.lastIndexOf("!");
-    if (result2 > autoPredict)
-        autoPredict = result2;
-    result2 = s.lastIndexOf(",");
-    if (result2 > autoPredict)
-        autoPredict = result2;
-    result2 = s.lastIndexOf(":");
-    if (result2 > autoPredict)
-        autoPredict = result2;
-    result2 = s.lastIndexOf(";");
-    if (result2 > autoPredict)
-        autoPredict = result2;
-    if (s.substr(autoPredict, 1) == '"')
-        result++;
-    autoPredict++;
+    let last = -1, m;
+    SENTENCE_BREAK.lastIndex = 0;
+    while ((m = SENTENCE_BREAK.exec(s))) last = m.index;
+    autoPredict = last + 1;
     filter.value = filterPredict = s.substr(autoPredict).trim();
     updateList();
 }
@@ -854,7 +814,7 @@ async function updateList2() {
     const info = document.getElementById('filterInfo');
     if (info) {
         info.hidden = !search;
-        document.getElementById('filterInfoText').textContent = search ? 'Matching “' + filter.value.trim() + '”' : '';
+        document.getElementById('filterInfoText').textContent = search ? t('Matching “{text}”', { text: filter.value.trim() }) : '';
     }
     if (true) { //!smallPortrait || categoryList.hidden) {
         let children = [...theList.children];
@@ -877,7 +837,7 @@ async function updateList2() {
         // Nothing matches: say so on the Matching line (an empty list looked like missing phrases)
         if (search && info) {
             const any = children.some(c => c.style.display !== 'none' && !c.classList.contains('ed-add') && !c.classList.contains('ai-injected-reply'));
-            document.getElementById('filterInfoText').textContent = (any ? 'Matching “' : 'No phrases match “') + filter.value.trim() + '”';
+            document.getElementById('filterInfoText').textContent = t(any ? 'Matching “{text}”' : 'No phrases match “{text}”', { text: filter.value.trim() });
         }
     } else { // don't search categories currently
         let children = [...categoryList.children];
@@ -904,7 +864,7 @@ function checkCategory(child, index) {
     let i = index - document.querySelectorAll("#messagesList .ai-injected-reply, #messagesList .ed-add").length;
     if (i < 0 || i >= manifestInfo.messages.length) return false;
 
-    if (categoryName == "All")
+    if (categoryName == allCategoryName()) // "All", whatever this set's language calls it
         return false;
     else if (manifestInfo.messages[i].categories.includes("[" + categoryName + "]"))
         return false;
@@ -932,32 +892,34 @@ function seedFavourites(info) {
     try {
         if (localStorage.getItem('texcomFavouritesSeeded')) return;
         localStorage.setItem('texcomFavouritesSeeded', '1');
-        if (!info || !Array.isArray(info.messages) || info.messages.some(m => (m.categories || '').includes('[Favourites]'))) return;
+        if (!info || !Array.isArray(info.messages) || (info.lang && info.lang !== 'en')) return; // English phrases only
+        const fav = '[' + info.categories[1].name + ']';
+        if (info.messages.some(m => (m.categories || '').includes(fav))) return;
         let added = 0;
         DEFAULT_FAVOURITES.forEach(name => {
             const m = info.messages.find(x => x.name.trim() === name);
-            if (m) { m.categories = (m.categories || '') + '[Favourites]'; added++; }
+            if (m) { m.categories = (m.categories || '') + fav; added++; }
         });
-        if (added) localStorage.setItem("JsonTex", JSON.stringify(info));
+        if (added) saveToLocalStorage();
     } catch (e) {}
 }
 
 async function loadManifest() {
-    try {
-        let txtcom = localStorage.getItem("JsonTex");
-        manifestInfo = JSON.parse(txtcom);
-        if (txtcom.length > 100) {
-            seedFavourites(manifestInfo);
-            processManifest();
-            setTimeout(() => { if (typeof checkForNewPhrases === 'function') checkForNewPhrases(); }, 2500);
-        }
+    // The user's own phrases, checked (and restored from the app's backup copy if the page's storage was lost)
+    const saved = loadSavedPhrases(params.language);
+    if (saved) {
+        manifestInfo = saved;
+        seedFavourites(manifestInfo);
+        processManifest();
+        setTimeout(() => { if (typeof checkForNewPhrases === 'function') checkForNewPhrases(); }, 2500);
         return;
-    } catch (e) {}
+    }
+    // First start: TexCom's English phrases, and an offer of the device's language if TexCom has it
     currentCommunicatorName = 'TexCom.json';
     let myObject = await fetch(currentCommunicatorName);
-    let myText = await myObject.text();
-    manifestInfo = JSON.parse(myText);
+    manifestInfo = checkPhraseSet(await myObject.text()).set;
     processManifest();
+    if (typeof offerDeviceLanguage === 'function') offerDeviceLanguage();
     return;
     for (let i = 0; i < 2; i++) {
         targetIndex = i;
@@ -984,206 +946,65 @@ window.addEventListener("orientationchange", function () {
     windowResized();
 }, false);
 
-function removeEmoji(s) {
-    s.replace(/([\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
-    return s;
-}
-
+// On a resize or rotation: the one- or two-column layout (index.html), the splash image, and the categories.
+// Two columns always show the categories; one column collapses them when switching into it.
+let lastLayoutOneColumn = null;
 function windowResized() {
-    //    var layoutViewport = document.getElementById('layoutViewport');
     smallPortrait = isOneColumnLayout();
-    try {
-        if (smallPortrait) {
-            gui.width = window.innerWidth * .74;
-        } else {
-            gui.width = window.innerWidth * .35;
-        }
-    } catch (e) {}
-    try {
-        let isLargeLandscape = !smallPortrait;
-    if (smallPortrait || !isLargeLandscape) {
-
-        // Reset theText and AI elements to fallback to CSS defaults
-        let theTextEl = document.getElementById('theText');
-//         if (theTextEl) { theTextEl.style.width = ""; theTextEl.style.left = ""; }
-        let chatHist = document.getElementById('chatHistoryContainer');
-//         if (chatHist) { chatHist.style.width = ""; chatHist.style.left = ""; }
-        let aiPred = document.getElementById('aiPredictionBox');
-//         if (aiPred) { aiPred.style.width = ""; aiPred.style.left = ""; }
-//         if (aiAuto) { aiAuto.style.width = ""; aiAuto.style.left = ""; }
-        theCatBtn = document.getElementById('theCategories');
-//         if (theCatBtn) { theCatBtn.style.width = ""; theCatBtn.style.left = ""; }
-        let btnFlipEl = document.getElementById('flip');
-        if (btnFlipEl) { btnFlipEl.style.left = ""; }
+    if (smallPortrait !== lastLayoutOneColumn) {
+        categoryList.hidden = smallPortrait || freeVersion;
+        lastLayoutOneColumn = smallPortrait;
     }
-    
-    if (isLargeLandscape) {
-        // Enforce split-brain visibility (both are always visible if appropriate)
-        theCatBtn = document.getElementById('theCategories');
-//         if(theCatBtn) { theCatBtn.style.display = 'block'; }
-        let msgList = document.getElementById('messagesList');
-        if(msgList) { msgList.style.display = 'block'; }
-        // Categories are always shown in two columns (portrait may have collapsed them)
-        categoryList.hidden = false;
-
-        // SPLIT-BRAIN LAYOUT for iPad / Large Screens
-        // Top buttons can stay roughly where they are in landscape (or span 100vw)
-        
-        buttonPanel.style.width = "100vw";
-        titleLbl.style.width = "100vw";
-        closeButton.style.left = "95vw";
-        txtText.style.width = "90vw";
-        btnTxtCol.style.width = "20vw";
-        btnTxtCol.style.left = "80vw";
-        lblRecording.style.width = "96vw";
-        btnPlay.style.width = "10vw";
-        btnRecSnd.style.width = "10vw";
-        btnRecSnd.style.left = "15vw ";
-        btnStopRec.style.width = "10vw";
-        btnStopRec.style.left = "30vw";
-        btnDeleteSnd.style.width = "10vw";
-        btnDeleteSnd.style.left = "45vw";
-        btnLoadSnd.style.width = "10vw";
-        btnLoadSnd.style.left = "60vw";
-        checkList.style.width = "24vw";
-        checkList.style.left = "34vw";
-        lblCategories.style.width = "23vw";
-        lblCategories.style.left = "34vw";
-        
-        splash.style.backgroundImage = "url('images/splash.jpg')";
-        
-        // --- Split Brain Layout ---
-        // Right Pane (Message Bank)
-        theCatBtn = document.getElementById('theCategories');
-        if (theCatBtn) { 
-//             theCatBtn.style.width = "49vw"; 
-//             theCatBtn.style.left = "50vw"; 
-            if(categoryList.hidden) {
-                theCatBtn.innerHTML = "Categories: " + categoryName + " ⏩";
-            } else {
-                theCatBtn.innerHTML = "Categories: " + categoryName + "  🔼";
-            }
-        }
-        
-//         categoryList.style.width = "50vw";
-//         categoryList.style.left = "50vw";
-//         theList.style.width = "50vw";
-//         theList.style.left = "50vw";
-//         filter.style.left = "50vw";
-//         filter.style.width = "49vw";
-        
-        // Left Pane (AI & Text)
-        let theTextEl = document.getElementById('theText');
-        if (theTextEl) {
-//             theTextEl.style.width = "48vw";
-//             theTextEl.style.left = "1vw";
-        }
-        let chatHist = document.getElementById('chatHistoryContainer');
-        if (chatHist) {
-//             chatHist.style.width = "48vw";
-//             chatHist.style.left = "1vw";
-        }
-        let aiPred = document.getElementById('aiPredictionBox');
-        if (aiPred) {
-//             aiPred.style.width = "48vw";
-//             aiPred.style.left = "1vw";
-        }
-        if (aiAuto) {
-//             aiAuto.style.width = "48vw";
-//             aiAuto.style.left = "1vw";
-        }
-        let btnFlipEl = document.getElementById('flip');
-        if (btnFlipEl) { btnFlipEl.style.left = "45vw"; }
-        
-        // Spread the top buttons across 100vw
-        
-//         texcomButton.style.left = "38vw";
-//         texcomButton.style.width = "10vw";
-//         texcomButton.style.backgroundSize = "9vw 5vh";
-        
-    } else if (smallPortrait) {
-        buttonPanel.style.width = "92vw";
-            titleLbl.style.width = "92vw";
-            closeButton.style.left = "87.25vw";
-            txtText.style.width = "82vw";
-            btnTxtCol.style.width = "20vw";
-            btnTxtCol.style.left = "70vw";
-            lblRecording.style.width = "87vw";
-            btnPlay.style.width = "15vw";
-            btnRecSnd.style.width = "15vw";
-            btnRecSnd.style.left = "21.5vw";
-            btnStopRec.style.width = "15vw";
-            btnStopRec.style.left = "38.5vw";
-            btnDeleteSnd.style.width = "15vw";
-            btnDeleteSnd.style.left = "55.5vw";
-            btnLoadSnd.style.width = "15vw";
-            btnLoadSnd.style.left = "72.5vw";
-            checkList.style.width = "39vw";
-            checkList.style.left = "50vw";
-            lblCategories.style.width = "38vw";
-            lblCategories.style.left = "50vw";
-
-            splash.style.backgroundImage = "url('images/TexCom Portrait.jpg')";
-//             //        theCategoriesButton.style.width = "100vw";
-            categoryList.hidden = true;
-//             categoryList.style.width = "100vw";
-//             theList.style.left = "0vw";
-//             theList.style.width = "100vw";
-//             filter.style.left = "0vw";
-//             filter.style.width = "100vw";
-
-            
-//             texcomButton.style.left = "51.25vw";
-//             texcomButton.style.width = "0vw";
-//             texcomButton.style.backgroundSize = "6.5vw 5vh";
-
-        } else {
-            buttonPanel.style.width = "60vw";
-            titleLbl.style.width = "60vw";
-            closeButton.style.left = "55.25vw";
-            txtText.style.width = "52vw";
-            btnTxtCol.style.width = "13vw";
-            btnTxtCol.style.left = "46vw";
-            lblRecording.style.width = "56vw";
-            btnPlay.style.width = "8vw";
-            btnRecSnd.style.width = "8vw";
-            btnRecSnd.style.left = "15vw ";
-            btnStopRec.style.width = "8vw";
-            btnStopRec.style.left = "26vw";
-            btnDeleteSnd.style.width = "8vw";
-            btnDeleteSnd.style.left = "37vw";
-            btnLoadSnd.style.width = "8vw";
-            btnLoadSnd.style.left = "48vw";
-            checkList.style.width = "24vw";
-            checkList.style.left = "34vw";
-            lblCategories.style.width = "23vw";
-            lblCategories.style.left = "34vw";
-
-            splash.style.backgroundImage = "url('images/splash.jpg')";
-//             //        theCategoriesButton.style.width = "50vw";
-            if (freeVersion) {
-//                 theList.style.left = "0vw";
-//                 theList.style.width = "100vw";
-                categoryList.hidden = true;
-            }
-            else {
-//             categoryList.style.width = "30vw";
-//             theList.style.left = "30vw";
-//             theList.style.width = "70vw";
-            categoryList.hidden = false;
-            }
-//             filter.style.left = "30vw";
-//             filter.style.width = "70vw";
-
-            
-//             texcomButton.style.left = "40.25vw";
-//             texcomButton.style.width = "19.5vw";
-//             texcomButton.style.backgroundSize = "19.5vw 5vh";
-        }
-    } catch (e) {}
+    if (splash) splash.style.backgroundImage = smallPortrait ? "url('images/TexCom Portrait.jpg')" : "url('images/splash.jpg')";
     updateCategoriesButton();
 }
 
+
+// Keyboard, switch and screen-reader access to the lists (rows had no way to be reached without a pointer).
+// Each list is one Tab stop; the arrow keys, Home and End move between the rows showing; Enter or Space chooses
+// the row, exactly as a tap does. Tab leaves the list.
+function setupListKeys(list, label) {
+    list.tabIndex = 0;
+    list.setAttribute('aria-label', t(label));
+    const rows = () => [...list.children].filter(li => li.style.display !== 'none' && !li.hidden && li.offsetParent !== null);
+    let current = null;
+    function focusRow(li) {
+        if (!li) return;
+        if (current && current !== li) current.removeAttribute('tabindex');
+        current = li;
+        li.tabIndex = 0;
+        list.tabIndex = -1; // while a row has focus, Shift+Tab goes to what's before the list, not the list itself
+        li.focus();
+        li.scrollIntoView({ block: 'nearest' });
+    }
+    list.addEventListener('focus', e => {
+        if (e.target !== list) return;
+        const r = rows();
+        focusRow(r.find(li => li.classList.contains('selected')) || r[0]);
+    });
+    list.addEventListener('focusout', e => {
+        if (!list.contains(e.relatedTarget)) { list.tabIndex = 0; if (current) current.removeAttribute('tabindex'); current = null; }
+    });
+    list.addEventListener('keydown', e => {
+        const li = e.target.closest && e.target.closest('li');
+        if (!li || li.parentElement !== list || e.target !== li) return; // not the pencil button inside a row
+        const r = rows(), i = r.indexOf(li);
+        let next = null;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = r[Math.min(i + 1, r.length - 1)];
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = r[Math.max(i - 1, 0)];
+        else if (e.key === 'Home') next = r[0];
+        else if (e.key === 'End') next = r[r.length - 1];
+        else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (li.classList.contains('ai-injected-reply')) li.click();          // suggested replies handle their own tap
+            else li.dispatchEvent(new CustomEvent('slip:tap', { bubbles: true })); // everything else: the list's tap handler
+            if (list.contains(li)) focusRow(li);
+            return;
+        } else return;
+        e.preventDefault();
+        focusRow(next);
+    });
+}
 
 function setupSlip(list) {
     list.addEventListener('slip:swipe', function (e) {
@@ -1194,16 +1015,17 @@ function setupSlip(list) {
 
     list.addEventListener('slip:tap', function (e) {
         if (window.pencilTapped) { window.pencilTapped = false; return false; } // editor.js pencil
+        // A tap on part of a row (its symbol) is a tap on the row: the symbol is a big target, and used to do nothing
+        const row = e.target.closest && e.target.closest('li');
+        if (row && row !== e.target && list.contains(row)) { row.dispatchEvent(new CustomEvent('slip:tap', { bubbles: true, cancelable: true })); return false; }
         if (e.target.classList.contains('ed-add')) { openNewItem(e.target.dataset.kind); return false; }
+        if (e.target.classList.contains('ai-injected-reply')) return false; // its own click handler puts it in the text box
         target = e.target;
-        if (e.target.innerHTML.length < 5) // clicked on emoji
-            return;
         targetIndex = listItemIndex(e.target);
         lastMessageClicked = targetIndex;
         mute();
-        console.log("Right button: ", rightButton);
         doingCategories = false;
-        if (!rightButton) {
+        {
             filter.value = "";
             if (e.currentTarget.id == "messagesList") {
                 console.log("Message: " + target.innerText);
@@ -1217,7 +1039,7 @@ function setupSlip(list) {
                     let ctg = tmpS.substr(tmpStart + 2, tmpS.length - 3);
                     ctg = ctg.replace("]", "");
                     categoryName = ctg;
-                    theCategoriesButton.innerHTML = "Categories: " + categoryName + "  ⏩";
+                    updateCategoriesButton();
                     updateWithCategory();
                     tmpS = tmpS.substr(0, tmpStart).trim()
                 }
@@ -1235,25 +1057,15 @@ function setupSlip(list) {
                 // filter.value = "";
                 filterPredict = "";
                 updateList();
-                theText.focus();
+                focusTextBox();
             } else {
                 let isLargeLandscape = !smallPortrait;
                 if (smallPortrait)
                     categoryList.hidden = true;
                 const tmp = e.target.innerText.substr(e.target.innerText.indexOf(' ')).trim();
                 categoryName = tmp;
-                theCategoriesButton.innerHTML = "Categories: " + categoryName + "  ⏩";
+                updateCategoriesButton();
                 updateWithCategory();
-            }
-        } else {
-            //            alert("Write code to Edit entry");
-            if (e.currentTarget.id == "messagesList")
-                doMenu(e);
-            else { // no menu for first two
-                doingCategories = true;
-                let children = [...categoryList.children];
-                if (e.target.innerText != categoryList.children[0].innerText && e.target.innerText != categoryList.children[1].innerText)
-                    doMenu(e);
             }
         }
         return false;
@@ -1309,121 +1121,6 @@ function setupSlip(list) {
     }, false);
 
     return new Slip(list);
-}
-
-async function doMenu(e) {
-    let listName = e.currentTarget.id;
-    posX = Math.min(posX, window.innerWidth - 150);
-    posY = Math.min(posY, window.innerHeight - 100);
-    const position = await PopupMenuPosition.alignAt(e.target, posX, posY);
-
-    // Align PopupMenu position to the bottom left of the button
-    // Show PopupMenu and wait for the selected menu id asynchronously
-
-    let selectedId;
-    if (target) {
-        if (doingCategories) {
-            if (manifestInfo.categories[targetIndex].deletable)
-                selectedId = await PopupMenu.show(itemList, position);
-            else
-                selectedId = await PopupMenu.show(itemListNoDelete, position);
-        } else {
-            if (manifestInfo.messages[targetIndex].deletable)
-                selectedId = await PopupMenu.show(itemList, position);
-            else
-                selectedId = await PopupMenu.show(itemListNoDelete, position);
-        }
-    }
-
-    if (selectedId) {
-        switch (itemList.find(item => item.itemId ==
-            selectedId).itemName) {
-            case "Edit":
-                openItemEditorForLi(target);
-                break;
-            case "Add new entry":
-                if (!doingCategories) {
-                    manifestInfo.messages.splice(targetIndex, 0, {
-                        name: "Blank",
-                        emoji: "▫️",
-                        colour: "#000000",
-                        deletable: true,
-                        fixed: false,
-                        abbreviation: " ",
-                        instant: false,
-                        categories: "[" + manifestInfo.categories[2].name + "]",
-                        gotaudio: false,
-                        audioData: "",
-                    });
-                    manifestInfo.lastMessageId = manifestInfo.messages.length;
-                    let li = document.createElement('li')
-                    li.className = "demo-no-reorder";
-                    li.innerHTML = makeLiText();
-                    li.dataset.bools = "fixed no-edit";
-                    theList.insertBefore(li, theList.children[targetIndex]);
-function getFullPersona() {
-    let p = [];
-    if(params.personaPronouns && params.personaPronouns !== 'Not Specified') p.push("Pronouns: " + params.personaPronouns);
-    if(params.personaTone) p.push("Tone: " + params.personaTone);
-    if(params.personaFormality) p.push("Formality: " + params.personaFormality);
-    
-    if(params.personaDisability && params.personaDisability !== 'Prefer not to say') {
-        p.push("Disability / Condition: " + params.personaDisability);
-    }
-    
-    if(params.personaDisclosure) {
-        if(params.personaDisclosure === 'Brief (Mention AAC if asked)') p.push("Disability Context: Mention you use an AAC device if asked");
-        else if(params.personaDisclosure === 'Prefer not to say (Decline to answer)') p.push("Disability Context: If asked about your disability or device, politely but firmly decline to answer and say you prefer not to discuss it.");
-        else if(params.personaDisclosure === 'Informative (Explain AAC)') p.push("Disability Context: Be open and informative about using an AAC device");
-        else if(params.personaDisclosure === 'Humorous') p.push("Disability Context: Make lighthearted jokes about using a robot voice/AAC device");
-        else p.push("Disability Context: Private (Do not mention disability or AAC)");
-    }
-    
-    if(params.personaHearing) {
-        if(params.personaHearing === 'Deaf (Ask to speak to device)') p.push("Hearing Status: You are Deaf. Ask the partner to speak clearly into the device so it can transcribe their words for you to read, or ask them to type on the Companion App/Bluetooth Keyboard.");
-        else if(params.personaHearing === 'Hard of Hearing (Ask to speak clearly)') p.push("Hearing Status: You are Hard of Hearing. Ask the partner to speak clearly and loudly into the device so it can transcribe their words.");
-    }
-    
-    if(params.userPersona && params.userPersona.trim().length > 0) p.push("Custom Details: " + params.userPersona.trim());
-    
-    // Inject Rolling Chat History Context for better AI awareness
-    if (window.rollingChatHistory && window.rollingChatHistory.length > 0) {
-        let hist = window.rollingChatHistory.map(m => m.role + ": " + m.text).join(" | ");
-        p.push("Recent Conversation Context: [" + hist + "]");
-    }
-    
-    return p.join(", ");
-}
-
-                } else { // categories
-                    manifestInfo.categories.splice(targetIndex, 0, {
-                        name: "Blank",
-                        emoji: "▫️",
-                        colour: "#000000",
-                        deletable: true,
-                        fixed: false
-                    });
-
-                    let li = document.createElement('li')
-                    li.className = "demo-no-reorder";
-                    li.innerHTML = makeLiText();
-                    li.dataset.bools = "fixed no-edit";
-                    categoryList.insertBefore(li, categoryList.children[targetIndex]);
-                }
-                break;
-            case "Delete":
-                if (doingCategories) {
-                    manifestInfo.categories.splice(targetIndex, 1);
-                } else {
-                    manifestInfo.messages.splice(targetIndex, 1);
-                }
-                e.target.remove();
-                saveToLocalStorage();
-                break;
-        }
-        //        alert(`You have selected: ${itemList.find(item => item.itemId
-        //            == selectedId).itemName}`);
-    }
 }
 
 const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -1554,10 +1251,10 @@ window.addEventListener('keydown', function(e) {
         e.preventDefault();
         e.stopPropagation();
         
-        window.currentPartnerTranscript = "Partner is typing...";
+        window.currentPartnerTranscript = t('Partner is typing…');
         let pill = document.getElementById('liveTranscriptPill');
         if(pill) {
-            pill.innerText = '💬 Partner is typing...';
+            pill.innerText = '💬 ' + t('Partner is typing…');
             pill.style.display = 'block';
         }
         return;
@@ -1705,7 +1402,7 @@ function closeMoreMenu() {
 function markToolbarPush() {
     const bar = document.getElementById('topToolbar'), more = document.getElementById('moreButton');
     bar.querySelectorAll('.tb-push').forEach(b => b.classList.remove('tb-push'));
-    const first = TOOLBAR_APP_GROUP.map(id => document.getElementById(id)).find(b => b.parentNode === bar);
+    const first = TOOLBAR_APP_GROUP.map(id => document.getElementById(id)).find(b => b.parentNode === bar && !b.hidden);
     (first || more).classList.add('tb-push');
 }
 
@@ -1741,7 +1438,10 @@ function layoutToolbar() {
         if (!menu.hidden) { closeMoreMenu(); return; }
         const r = more.getBoundingClientRect();
         menu.style.top = (r.bottom + 4) + 'px';
-        menu.style.right = (window.innerWidth - r.right) + 'px';
+        // Opens towards the middle of the screen: from ⋯'s right edge, or its left edge in a right-to-left language
+        const rtl = getComputedStyle(more).direction === 'rtl';
+        menu.style.right = rtl ? '' : (window.innerWidth - r.right) + 'px';
+        menu.style.left = rtl ? r.left + 'px' : '';
         menu.hidden = false;
         more.setAttribute('aria-expanded', 'true');
         const first = menu.querySelector('button:not(:disabled)');
@@ -1776,7 +1476,7 @@ function setMicButton(on) {
     const b = document.getElementById('micButton');
     if(!b) return;
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.title = on ? 'Stop listening' : 'Listen to partner';
+    b.title = t(on ? 'Stop listening' : 'Listen to partner');
     b.setAttribute('aria-label', b.title);
 }
 
@@ -1800,8 +1500,8 @@ document.addEventListener('DOMContentLoaded', function () {
 window.openHelp = function () {
     const o = document.getElementById('helpOverlay'), f = document.getElementById('helpFrame');
     if (!o || !f) return;
-    const url = 'texcomhelp.html?hasAI=' + (window.deviceSupportsAI ? 'true' : 'false');
-    if (!f.getAttribute('src')) f.setAttribute('src', url);
+    const url = 'texcomhelp.html?hasAI=' + (window.deviceSupportsAI ? 'true' : 'false') + '&lang=' + encodeURIComponent(currentLanguage());
+    if (f.getAttribute('src') !== url) f.setAttribute('src', url); // reloads in the new language after a switch
     window.__helpReturnFocus = document.activeElement;
     o.hidden = false;
     setTimeout(() => document.getElementById('helpClose').focus(), 50);

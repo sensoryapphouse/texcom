@@ -47,7 +47,7 @@
 
 /* --- Shared sizing: one base text size, never below 16px, growing gently with the smaller screen side --- */
 :root {
-    --ui-font: clamp(16px, calc(9px + 1.6vmin), 24px);
+    --ui-font: calc(clamp(16px, calc(9px + 1.6vmin), 24px) * var(--ui-scale, 1)); /* --ui-scale: Settings > Text size */
     --ui-emoji: calc(var(--ui-font) * 1.4);
     --ui-gap: 8px;
 }
@@ -655,3 +655,4 @@
 #moreMenu .action-btn:hover { background-color: var(--btn-hover); }
 #moreMenu .action-btn svg { width: calc(var(--tb-btn) * 0.55); height: calc(var(--tb-btn) * 0.55); flex-shrink: 0; }
 #moreMenu .action-btn::after { content: attr(title); font-weight: 500; }
+

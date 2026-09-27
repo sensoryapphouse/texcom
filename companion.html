@@ -8,6 +8,8 @@
     <!-- The partner's phone: the TexCom user's last phrase, very large, and a box to type a reply.
          Opened from the QR code in TexCom (Settings > Partner display). Connects over the companion link (PeerJS). -->
     <script src="libraries/peerjs.min.js"></script>
+    <script src="languages-list.js"></script>
+    <script src="language.js"></script> <!-- t(): this page is in the partner's own language (their browser's) -->
     <style>
         html, body { margin: 0; height: 100%; background: #000; color: #fff; overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -41,21 +43,29 @@
 </head>
 <body>
     <form id="nameScreen" class="name-screen" autocomplete="on" hidden>
-        <h1>TexCom conversation</h1>
-        <p>Someone using TexCom would like to talk with you. What should they call you?</p>
-        <label for="nameInput">Your name</label>
+        <h1 data-t>TexCom conversation</h1>
+        <p data-t>Someone using TexCom would like to talk with you. What should they call you?</p>
+        <label for="nameInput" data-t>Your name</label>
         <input id="nameInput" name="name" type="text" maxlength="40" autocomplete="given-name" enterkeyhint="go" required>
-        <button type="submit">Join</button>
+        <button type="submit" data-t>Join</button>
     </form>
-    <div id="status" role="status">Connecting…</div>
-    <div id="stage"><div id="phrase" class="waiting" aria-live="polite">Waiting for a message…</div></div>
+    <div id="status" role="status"></div>
+    <div id="stage"><div id="phrase" dir="auto" class="waiting" aria-live="polite"></div></div>
     <form id="reply" autocomplete="off">
-        <label for="msgInput" style="position:absolute;left:-9999px">Your reply</label>
-        <input type="text" id="msgInput" placeholder="Type a reply…" enterkeyhint="send" disabled>
-        <button id="sendBtn" type="submit" disabled>Send</button>
+        <label for="msgInput" style="position:absolute;left:-9999px" data-t>Your reply</label>
+        <input type="text" id="msgInput" placeholder="Type a reply…" data-t-attrs="placeholder" enterkeyhint="send" disabled>
+        <button id="sendBtn" type="submit" disabled data-t>Send</button>
     </form>
 
     <script>
+        // The partner's own language (their browser's): the page's text, and its direction
+        const partnerLang = deviceLanguageCode();
+        document.documentElement.lang = partnerLang;
+        document.documentElement.dir = texcomLanguage(partnerLang).dir || 'ltr';
+        const firstTexts = () => {
+            if (!statusEl.textContent || statusEl.dataset.first) { statusEl.textContent = t('Connecting…'); statusEl.dataset.first = '1'; }
+            if (phraseEl.classList.contains('waiting')) phraseEl.textContent = t('Waiting for a message…');
+        };
         const hostId = (new URLSearchParams(location.search).get('id') || '').replace(/^texcom-/i, '').toLowerCase();
         const statusEl = document.getElementById('status');
         const stage = document.getElementById('stage');
@@ -64,7 +74,7 @@
         const sendBtn = document.getElementById('sendBtn');
         let peer = null, conn = null, retryTimer = null;
 
-        function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = cls || ''; }
+        function setStatus(text, cls) { statusEl.textContent = t(text); statusEl.className = cls || ''; delete statusEl.dataset.first; }
         function setConnected(on) { msgInput.disabled = sendBtn.disabled = !on; }
 
         // Largest font size at which the phrase fits (same rule as partner.html)
@@ -93,12 +103,14 @@
         const RELAY_URL = 'https://texcom-relay.dave-c09.workers.dev/ice';
         const FALLBACK_ICE = [{ urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'stun:stun.l.google.com:19302' }];
         let myName = '', token = '', accepted = false, ended = false, hostName = '';
+        let signalling = null; // another introduction server, if the relay names one (see conversation.js)
 
         async function iceServers() {
             try {
                 const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
                 const j = await (await fetch(RELAY_URL, { signal: ctl.signal, cache: 'no-store' })).json();
                 clearTimeout(t);
+                signalling = (j.signalling && typeof j.signalling.host === 'string') ? j.signalling : null;
                 if (Array.isArray(j.iceServers) && j.iceServers.length) return j.iceServers;
             } catch (e) {}
             return FALLBACK_ICE;
@@ -118,7 +130,7 @@
         function connect() {
             clearTimeout(retryTimer);
             if (ended || !peer || peer.destroyed || peer.disconnected) return;
-            setStatus(accepted ? 'Reconnecting…' : 'Connecting…');
+            setStatus(t(accepted ? 'Reconnecting…' : 'Connecting…'));
             if (attempt && attempt !== conn) { try { attempt.close(); } catch (e) {} }
             const c = attempt = peer.connect('texcom-' + hostId, { reliable: true });
             c.on('open', () => { retries = 0; c.send({ t: 'hello', name: myName, app: 'web', token }); if (!accepted) setStatus('Waiting to be let in…'); });
@@ -126,10 +138,10 @@
                 if (!msg || typeof msg !== 'object') return;
                 if (msg.t === 'accepted') {
                     accepted = true; token = msg.token || ''; hostName = String(msg.name || 'TexCom').slice(0, 40); conn = c;
-                    setStatus('Talking with ' + hostName, 'ok'); setConnected(true);
+                    setStatus(t('Talking with {name}', { name: hostName }), 'ok'); setConnected(true);
                 } else if (msg.t === 'declined') { finish('You weren’t let in to this conversation.'); }
                 else if (msg.t === 'busy') { finish('This conversation already has someone in it.'); }
-                else if (msg.t === 'bye') { finish(hostName + ' ended the conversation.'); }
+                else if (msg.t === 'bye') { finish(t('{name} ended the conversation.', { name: hostName })); }
                 else if (msg.t === 'say' && c === conn) showPhrase(msg.text); // the TexCom user's phrases
             });
             c.on('close', () => {
@@ -147,7 +159,7 @@
 
         async function begin() {
             if (typeof Peer === 'undefined') { setStatus('Couldn’t load the connection library.', 'bad'); return; }
-            peer = new Peer({ config: { iceServers: await iceServers() } });
+            peer = new Peer(Object.assign({ config: { iceServers: await iceServers() } }, signalling || {}));
             peer.on('open', connect);
             peer.on('error', (err) => {
                 if (ended) return;
@@ -157,8 +169,9 @@
                     if (!accepted && retries >= 4) { finish('This conversation isn’t open. Ask for a new link.'); return; }
                     setStatus('This conversation isn’t open. Trying again…', 'bad');
                 }
-                else if (err.type === 'network' || err.type === 'server-error') setStatus('No internet connection. Trying again…', 'bad');
-                else setStatus('Connection problem (' + err.type + '). Trying again…', 'bad');
+                else if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(err.type))
+                    setStatus(navigator.onLine === false ? t('No internet connection. Trying again…') : t('Can’t reach the conversation service. Trying again…'), 'bad');
+                else setStatus(t('Connection problem ({type}). Trying again…', { type: err.type }), 'bad');
                 retryLater();
             });
             peer.on('disconnected', () => { if (!ended && !peer.destroyed) { setStatus('Reconnecting…', 'bad'); peer.reconnect(); } });
@@ -189,9 +202,12 @@
             if (!text || !conn || !conn.open) return;
             conn.send({ t: 'say', text });
             msgInput.value = '';
-            setStatus('Sent: ' + text, 'ok');
+            setStatus(t('Sent: {text}', { text }), 'ok');
         });
 
+        firstTexts();
+        window.addEventListener('texcom-ui-text', firstTexts);
+        loadUIText(partnerLang);
         new ResizeObserver(fit).observe(stage); // any size change: window, rotation, on-screen keyboard
         fit();
     </script>
