@@ -450,6 +450,7 @@ function nativeMessage(message) {
         'On-device AI is not available on this device': t('On-device AI isn’t available on this device.'),
         'On-device AI needs iOS 26 or macOS 26': t('On-device AI needs iOS 26 or macOS 26.'),
         'No expansion': t('Couldn’t expand that.'),
+        'Not available in this language': t('Smart AI doesn’t work in {language} yet.', { language: languageName(currentLanguage()) }),
     };
     return known[message] || message;
 }
@@ -558,7 +559,7 @@ window.receiveAutoReplies = function(repliesString) {
 window.requestContextualPhrases = function() {
     // Suggested replies come from the apps' on-device AI; a browser has none (it used to show three fixed English
     // replies, "I agree." and so on, after everything said, in every language)
-    if (!window.deviceSupportsAI) return;
+    if (!aiAllowed()) return; // (also: a language the device's AI doesn't support, unless the user tries it)
     let historyStr = "";
     if(window.rollingChatHistory && window.rollingChatHistory.length > 0) {
         historyStr = window.rollingChatHistory.map(h => `${h.role}: ${h.text}`).join(" | ");
@@ -598,7 +599,7 @@ window.requestContextualPhrases = function() {
 
 window.expandTextWithLLM = expandTextWithLLM;
 function expandTextWithLLM() {
-    if(!params.llmExpansion || !window.deviceSupportsAI) return; // no AI in a browser: "@" is just a character
+    if(!params.llmExpansion || !aiAllowed()) return; // no AI (a browser, or a language it doesn't support): "@" is just a character
     
     let shorthand = theText.value;
     if(shorthand.endsWith("@")) {
@@ -718,7 +719,7 @@ window.receivePredictions = function(predsString) {
         }
         
         currentText = currentText.trim();
-        if(currentText.length === 0) return;
+        if(currentText.length === 0 || !aiAllowed()) return; // word predictions: the AI, where it's allowed
         
         textPredictDebounce = setTimeout(function() {
             let msg = "PredictNextWords:" + currentText;

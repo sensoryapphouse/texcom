@@ -22,6 +22,19 @@ function getBestEmoji(text, categoryName) {
 }
 
 // On-device AI runs only inside the TexCom apps (iPhone / iPad / Mac, Android), never in a web browser
+// Smart AI (the apps' on-device model) in the language in use. The apps list the languages their model supports
+// (window.texcomAILanguages); in others it can give wrong sentences or fail, so it's off there unless the user chooses
+// to try it, language by language (params.aiTryLanguages)
+window.aiLanguageSupported = function (code) {
+    const list = window.texcomAILanguages;
+    if (!Array.isArray(list)) return true; // the app doesn't say (its model isn't available, or an older app)
+    let base = String(code || currentLanguage()).split('-')[0];
+    if (base === 'no') base = 'nb';
+    return list.includes(base);
+};
+window.aiAllowed = function () {
+    return !!window.deviceSupportsAI && (aiLanguageSupported() || (params.aiTryLanguages || []).includes(currentLanguage()));
+};
 window.deviceSupportsAI = !!((typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers) || window.AndroidTexCom);
 var jsonString;
 var smallPortrait = false;
@@ -279,8 +292,9 @@ var share = {
     Share_Board: async function () {
         setTimeout(clickSettings, 100);
 
-        var name = currentCommunicatorName;
+        var name = currentCommunicatorName || 'TexCom.json';
         var text = JSON.stringify(manifestInfo, null, ' ');
+        if (appShare) { appShare('ShareFile:' + name + '\n' + text); return; }
 
         var myBlob = new Blob([text], {
             type: "text/plain"
@@ -290,7 +304,13 @@ var share = {
     }
 };
 
+// In the apps, sharing goes through the system's share sheet: the web view's own offered only Copy on the Mac
+const appShare = (typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom)
+    ? m => window.webkit.messageHandlers.TexCom.postMessage({ m }) : null;
+
 async function shareMessage() {
+    if (appShare) { appShare('ShareText:' + theText.value); return; }
+    if (!navigator.share) return; // a browser without sharing (the button does nothing rather than throw)
     let shareData = {
         text: theText.value
     }
@@ -562,10 +582,19 @@ function setUpGUI() {
         // Always-visible explanation (the old "?" was a hover-only tooltip, unreadable on touch screens)
         aiHtml += `<p class="settings-note">${escapeHTML(t('The features below run privately on the device, so they need the TexCom app for iPhone, iPad, Mac or Android. They aren’t available in a web browser.'))}</p>`;
     }
+    // In a language the device's AI model doesn't support: say so, and offer to try it anyway
+    const aiLang = isNative && !aiLanguageSupported();
+    const aiOn = isNative && aiAllowed();
+    const aiDis = aiOn ? '' : 'disabled';
+    if (aiLang) {
+        const name = languageName(currentLanguage());
+        aiHtml += `<p class="settings-note">${escapeHTML(t('Smart AI doesn’t work in {language} yet.', { language: name }))}</p>`;
+        aiHtml += buildRow(t('Try Smart AI in {language} anyway (it may make mistakes)', { language: name }), `<input type="checkbox" id="set_aiTry" class="settings-checkbox" ${aiOn ? 'checked' : ''}>`);
+    }
     aiHtml += `<div id="smartAIGrid"${isNative ? '' : ' class="settings-unavailable"'}>`;
-    aiHtml += buildRow("Smart Expand (type @)", `<input type="checkbox" id="set_expand" class="settings-checkbox" ${isNative && params.llmExpansion ? 'checked' : ''} ${disAttr}>`);
+    aiHtml += buildRow("Smart Expand (type @)", `<input type="checkbox" id="set_expand" class="settings-checkbox" ${aiOn && params.llmExpansion ? 'checked' : ''} ${aiDis}>`);
     aiHtml += buildRow("Start listening when TexCom opens", `<input type="checkbox" id="set_ambient" class="settings-checkbox" ${isNative && params.ambientListening ? 'checked' : ''} ${disAttr}>`);
-    aiHtml += `<button class="settings-action-btn" id="btn_editPersona" ${disAttr}><span aria-hidden="true">🧑</span>${t('Edit AI persona…')}</button>`;
+    aiHtml += `<button class="settings-action-btn" id="btn_editPersona" ${aiDis}><span aria-hidden="true">🧑</span>${t('Edit AI persona…')}</button>`;
     aiHtml += `</div>`;
     
     // --- SPEECH ---
@@ -623,6 +652,13 @@ function setUpGUI() {
     document.getElementById('set_readAloud').onchange = (e) => { params.readPartnerAloud = e.target.checked; saveParams(); };
     
     document.getElementById('set_expand').onchange = (e) => { params.llmExpansion = e.target.checked; saveParams(); };
+    const aiTry = document.getElementById('set_aiTry');
+    if (aiTry) aiTry.onchange = (e) => {
+        const code = currentLanguage(), list = (params.aiTryLanguages || []).filter(c => c !== code);
+        params.aiTryLanguages = e.target.checked ? list.concat(code) : list;
+        saveParams();
+        setUpGUI(); // Smart Expand and the persona follow
+    };
     let elAmbient = document.getElementById('set_ambient');
     if(elAmbient) {
         elAmbient.onchange = (e) => { 
