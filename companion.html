@@ -23,6 +23,12 @@
             overflow-wrap: break-word; transition: opacity 0.2s ease; }
         #phrase.waiting { color: #6b7280; font-weight: 400; }
         #reply { flex-shrink: 0; display: flex; gap: 10px; padding: 10px 12px 12px; background: #111827; }
+        /* PiCom's partner-assisted scanning: the partner moves the highlight on the child's board, and can choose */
+        #scanRow { flex-shrink: 0; display: flex; gap: 10px; align-items: center; padding: 0 12px 12px; background: #111827; color: #cbd5e1; font-size: 15px; }
+        #scanRow[hidden] { display: none; }
+        #scanRow span { flex: 1; }
+        #scanRow button { min-width: 56px; min-height: 48px; font-size: 20px; border: 0; border-radius: 10px; background: #334155; color: #fff; }
+        #scanRow button:disabled { opacity: .4; }
         #msgInput { flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; padding: 10px 14px; border-radius: 12px;
             border: 2px solid #374151; background: #1f2937; color: #fff; font-size: 18px; } /* 16px+ stops iOS zooming */
         #msgInput:focus { outline: none; border-color: #60a5fa; }
@@ -56,6 +62,12 @@
         <input type="text" id="msgInput" placeholder="Type a reply…" data-t-attrs="placeholder" enterkeyhint="send" disabled>
         <button id="sendBtn" type="submit" disabled data-t>Send</button>
     </form>
+    <div id="scanRow" hidden>
+        <span data-t>Move the highlight (partner-assisted scanning)</span>
+        <button type="button" id="scanBack" data-act="back" aria-label="Back" data-t-attrs="aria-label" disabled>&#9664;</button>
+        <button type="button" id="scanNext" data-act="next" aria-label="Next" data-t-attrs="aria-label" disabled>&#9654;</button>
+        <button type="button" id="scanChoose" data-act="choose" data-t disabled>Choose</button>
+    </div>
 
     <script>
         // The partner's own language (their browser's): the page's text, and its direction
@@ -67,6 +79,20 @@
             if (phraseEl.classList.contains('waiting')) phraseEl.textContent = t('Waiting for a message…');
         };
         const hostId = (new URLSearchParams(location.search).get('id') || '').replace(/^texcom-/i, '').toLowerCase();
+        // Opened from PiCom (…&app=picom; PiCom speaks the same protocol): the same page and translated words, with
+        // PiCom's name (the translations keep the product name as it is)
+        const appName = new URLSearchParams(location.search).get('app') === 'picom' ? 'PiCom' : 'TexCom';
+        if (appName !== 'TexCom') {
+            const rename = () => {
+                document.title = document.title.replace(/TexCom/g, appName);
+                document.querySelectorAll('#nameScreen [data-t]').forEach(el => {
+                    if (el.__tEn === undefined) el.__tEn = el.textContent;   // the English stays the key for translating
+                    el.textContent = el.textContent.replace(/TexCom/g, appName);
+                });
+            };
+            rename();
+            window.addEventListener('texcom-ui-text', rename);
+        }
         const statusEl = document.getElementById('status');
         const stage = document.getElementById('stage');
         const phraseEl = document.getElementById('phrase');
@@ -75,7 +101,9 @@
         let peer = null, conn = null, retryTimer = null;
 
         function setStatus(text, cls) { statusEl.textContent = t(text); statusEl.className = cls || ''; delete statusEl.dataset.first; }
-        function setConnected(on) { msgInput.disabled = sendBtn.disabled = !on; }
+        // (the scanning buttons too, when the page was opened from PiCom; they act when its partner-assisted scanning is on)
+        const scanButtons = [...document.querySelectorAll('#scanRow button')];
+        function setConnected(on) { msgInput.disabled = sendBtn.disabled = !on; scanButtons.forEach(b => { b.disabled = !on; }); }
 
         // Largest font size at which the phrase fits (same rule as partner.html)
         function fit() {
@@ -137,7 +165,7 @@
             c.on('data', (msg) => {
                 if (!msg || typeof msg !== 'object') return;
                 if (msg.t === 'accepted') {
-                    accepted = true; token = msg.token || ''; hostName = String(msg.name || 'TexCom').slice(0, 40); conn = c;
+                    accepted = true; token = msg.token || ''; hostName = String(msg.name || appName).slice(0, 40); conn = c;
                     setStatus(t('Talking with {name}', { name: hostName }), 'ok'); setConnected(true);
                 } else if (msg.t === 'declined') { finish('You weren’t let in to this conversation.'); }
                 else if (msg.t === 'busy') { finish('This conversation already has someone in it.'); }
@@ -196,6 +224,8 @@
         }
         window.addEventListener('beforeunload', () => { try { if (conn && conn.open) conn.send({ t: 'bye' }); } catch (e) {} });
 
+        if (appName === 'PiCom') document.getElementById('scanRow').hidden = false;
+        scanButtons.forEach(b => b.addEventListener('click', () => { if (conn && conn.open) conn.send({ t: 'scan', act: b.dataset.act }); }));
         document.getElementById('reply').addEventListener('submit', (e) => {
             e.preventDefault();
             const text = msgInput.value.trim();

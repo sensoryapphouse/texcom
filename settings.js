@@ -187,6 +187,13 @@ async function saveParams() {
 function resetParams() {
     window.localStorage.removeItem("TexCom");
     params = freshDefaults();
+    // An Android phone set to large text (its Settings > Display): TexCom's own text size starts large to match. The
+    // app keeps the page at TexCom's size, because the phone's setting enlarged only the words, not the buttons and
+    // boxes around them ("Speak" broke in two, labels were cut off)
+    try {
+        const phone = window.AndroidTexCom && window.AndroidTexCom.fontScale && parseFloat(window.AndroidTexCom.fontScale());
+        if (phone > 1.05) params.textScale = Math.min(1.6, Math.round(phone * 10) / 10);
+    } catch (e) {}
 }
 
 async function loadParams() {
@@ -425,6 +432,39 @@ function buildSection(title, rowsHtml) {
 }
 
 
+// The PIN for Settings and phrase editing (carer.js): set, change or remove. A recovery code is shown once when it is
+// set: it opens TexCom if the PIN is forgotten.
+function renderPinCard(card) {
+    if (!card || !window.TexComCarer) return;
+    const has = TexComCarer.hasPin();
+    card.innerHTML = `<p class="settings-note">${escapeHTML(t(has ? 'Settings and phrase editing need the PIN.' : 'No PIN: anyone can open Settings and edit phrases.'))}</p>
+        <form class="settings-pin-form"${has ? ' hidden' : ''}>
+            <input type="password" inputmode="numeric" autocomplete="new-password" maxlength="8" class="settings-input" placeholder="${escapeHTML(t('New PIN (4 to 8 digits)'))}" aria-label="${escapeHTML(t('New PIN (4 to 8 digits)'))}">
+            <input type="password" inputmode="numeric" autocomplete="new-password" maxlength="8" class="settings-input" placeholder="${escapeHTML(t('Repeat the new PIN'))}" aria-label="${escapeHTML(t('Repeat the new PIN'))}">
+            <p class="settings-note settings-pin-msg" role="status"></p>
+            <button type="submit" class="settings-action-btn"><span aria-hidden="true">🔒</span>${escapeHTML(t('Set PIN'))}</button>
+        </form>
+        ${has ? `<button type="button" class="settings-action-btn" id="btn_changePin"><span aria-hidden="true">🔑</span>${escapeHTML(t('Change PIN'))}</button>
+                 <button type="button" class="settings-action-btn" id="btn_removePin"><span aria-hidden="true">🔓</span>${escapeHTML(t('Remove PIN'))}</button>` : ''}`;
+    const form = card.querySelector('form'), inputs = form.querySelectorAll('input'), msg = form.querySelector('.settings-pin-msg');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!/^\d{4,8}$/.test(inputs[0].value)) { msg.textContent = t('New PIN (4 to 8 digits)'); return; }
+        if (inputs[0].value !== inputs[1].value) { msg.textContent = t('The two PINs are different'); return; }
+        const code = await TexComCarer.setPin(inputs[0].value);
+        renderPinCard(card);
+        const rc = document.createElement('div');
+        rc.className = 'settings-recovery';
+        rc.innerHTML = `<p class="settings-note"><strong>${escapeHTML(t('Recovery code'))}: <span class="settings-recovery-code">${escapeHTML(code)}</span></strong></p>
+            <p class="settings-note">${escapeHTML(t('Write this code down and keep it safe: it opens TexCom if the PIN is forgotten.'))}</p>`;
+        card.appendChild(rc);
+    };
+    const change = card.querySelector('#btn_changePin');
+    if (change) change.onclick = () => { form.hidden = false; inputs[0].focus(); };
+    const remove = card.querySelector('#btn_removePin');
+    if (remove) remove.onclick = () => { TexComCarer.removePin(); renderPinCard(card); };
+}
+
 // The file inputs come after this script in index.html, so attach once the page is parsed
 // (attaching immediately threw, and "Load Communicator" / "Add text from file" never worked)
 document.addEventListener('DOMContentLoaded', function () {
@@ -605,6 +645,12 @@ function setUpGUI() {
     speechHtml += buildRow("Volume", buildSlider('set_volume', 0, 1, 0.1, params.voiceVolume, fmtPercent));
     speechHtml += `<button class="settings-action-btn" id="btn_testVoice"><span aria-hidden="true">🔊</span>${t('Test voice')}</button>`;
     
+    // --- PROTECT (carer.js) ---
+    let protectHtml = buildRow("Settings button on the main screen", `<input type="checkbox" id="set_showSettingsBtn" class="settings-checkbox" ${params.showSettingsButton !== false ? 'checked' : ''}>`);
+    protectHtml += `<p class="settings-note">${escapeHTML(t('Settings is always on the start screen. To get back to the start screen from the main screen, hold a top corner for 3 seconds.'))}</p>`;
+    protectHtml += buildRow("Lock phrases (no editing)", `<input type="checkbox" id="set_lockPhrases" class="settings-checkbox" ${params.lockPhrases ? 'checked' : ''}>`);
+    protectHtml += `<div id="pinCard"></div>`;
+
     // --- DATA ---
     let dataHtml = '';
     if (starterUpdate && starterUpdate.phrases.length) {
@@ -623,6 +669,7 @@ function setUpGUI() {
                         buildSection("Conversation", partnerHtml) +
                         buildSection(aiTitle, aiHtml) + 
                         buildSection("Speech", speechHtml) + 
+                        buildSection("Protect TexCom", protectHtml) + 
                         buildSection("Data & Sharing", dataHtml);
 
     // Bind Events
@@ -650,6 +697,9 @@ function setUpGUI() {
     bindConv('btn_convJoin', () => window.openJoinConversation && openJoinConversation());
     bindConv('btn_convEnd', () => window.Conversation && Conversation.end());
     document.getElementById('set_readAloud').onchange = (e) => { params.readPartnerAloud = e.target.checked; saveParams(); };
+    document.getElementById('set_showSettingsBtn').onchange = (e) => { params.showSettingsButton = e.target.checked; saveParams(); if (window.TexComCarer) TexComCarer.applyProtection(); };
+    document.getElementById('set_lockPhrases').onchange = (e) => { params.lockPhrases = e.target.checked; saveParams(); if (window.TexComCarer) TexComCarer.applyProtection(); };
+    renderPinCard(document.getElementById('pinCard'));
     
     document.getElementById('set_expand').onchange = (e) => { params.llmExpansion = e.target.checked; saveParams(); };
     const aiTry = document.getElementById('set_aiTry');
@@ -668,14 +718,18 @@ function setUpGUI() {
     }
     document.getElementById('btn_editPersona').onclick = () => { if(typeof personaObj !== 'undefined') personaObj.editPersona(); };
     
-    // Populate voices dynamically
-    setTimeout(() => {
+    // The Android app answers with the phone's voices (gotWKWebViewVoices), in time for the list below
+    if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) window.AndroidTexCom.postMessage(JSON.stringify({ "m": "GetVoices" }));
+    // Populate voices dynamically (again when the app sends its voices: gotWKWebViewVoices)
+    window.populateVoices = () => {
         let voiceSelect = document.getElementById('set_voice');
         let sl = [];
         if (typeof doingSAPI !== 'undefined' && doingSAPI && typeof SAPInames !== 'undefined' && SAPInames) {
             sl = SAPInames.split(',');
         } else if (typeof webViewIOS !== 'undefined' && webViewIOS && typeof IOSnames !== 'undefined' && IOSnames) {
             sl = ['Default'].concat(IOSnames.split(',')); // "Default" = the system voice, which is used until one is chosen
+        } else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && typeof SAPInames !== 'undefined' && SAPInames) {
+            sl = ['Default'].concat(SAPInames.split(',')); // the phone's own voices; "Default" = the phone's chosen voice
         } else if ('speechSynthesis' in window) {
             let v = window.speechSynthesis.getVoices();
             // If running as a PWA, only show local voices
@@ -696,7 +750,8 @@ function setUpGUI() {
                 previewVoice();
             };
         }
-    }, 1000);
+    };
+    setTimeout(window.populateVoices, 1000);
     
     // Sliders: show the value while dragging; apply and preview when released
     [['set_pitch', 'voicePitch', fmtTimes], ['set_rate', 'voiceRate', fmtTimes], ['set_volume', 'voiceVolume', fmtPercent]].forEach(([id, key, fmt]) => {
@@ -777,6 +832,7 @@ function changeVoice(name) {
     else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) {
         let cleanName = name;
         if(name.indexOf(":") > -1) cleanName = name.substring(0, name.indexOf(":"));
+        if (name === 'Default') cleanName = 'Default';
         window.AndroidTexCom.postMessage(JSON.stringify({ "m": "Voice:" + cleanName }));
         window.AndroidTexCom.postMessage(JSON.stringify({ "m": "Pitch:" + params.voicePitch }));
         window.AndroidTexCom.postMessage(JSON.stringify({ "m": "Speed:" + params.voiceRate }));

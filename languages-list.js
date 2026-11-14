@@ -1,5 +1,5 @@
 // TexCom's languages: BCP-47 code, name in the language itself, English name, text direction, and the words the
-// Yes / No toolbar buttons say. Phrase sets for these are in languages/phrases/<code>.json on texcom.pages.dev
+// Yes / No toolbar buttons say. Phrase sets for these are in manifests/<code>.json
 // (English is built in: TexCom.json). The other sets were machine translated and not yet checked by a speaker.
 // gemini: the code Gemini's translation run used (translation-tools/raw), where it differs.
 window.TEXCOM_LANGUAGES = [

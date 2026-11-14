@@ -4,8 +4,8 @@
 //
 // Switching language (Settings > General > Language) saves the phrases in
 // use and opens the user's own set for the other language. The first time a language is chosen, TexCom offers its
-// phrases in it: English is built in (TexCom.json); the others are fetched from
-// texcom.pages.dev/languages/phrases/<code>.json (languages-list.js lists them).
+// phrases in it: English is TexCom.json; the others are manifests/<code>.json (languages-list.js lists them), bundled
+// in the apps and published with the web app.
 (function () {
     const PUBLIC_BASE = 'https://texcom.pages.dev/'; // the web app's address (as in conversation.js)
 
@@ -100,21 +100,30 @@
     }
     function voiceList() {
         if (typeof webViewIOS !== 'undefined' && webViewIOS && typeof IOSnames !== 'undefined' && IOSnames) return IOSnames.split(',');
+        // The Android app's voices ("Sofía: Spanish (Spain)"); it had no list here, so a change of language kept the
+        // old voice (Spanish read by an English voice)
+        if (typeof webViewAndroid !== 'undefined' && webViewAndroid && typeof SAPInames !== 'undefined' && SAPInames) return SAPInames.split(',');
         if (typeof doingSAPI !== 'undefined' && doingSAPI && typeof SAPInames !== 'undefined' && SAPInames) return SAPInames.split(',');
         if ('speechSynthesis' in window) return speechSynthesis.getVoices().map(v => v.name + ': ' + v.lang);
         return [];
     }
     // The voice for a language: the one last chosen for it, else the chosen voice if it speaks it, else the first
     // voice that does. Each language remembers its own voice (params.voices), so switching back restores it.
+    // A voice's language code. After its name ("Thomas: fr-FR"), except the Android app's voices, which show the
+    // language's name there ("Sofía: Spanish (Spain)"): the app gives their codes separately (versions.js gotVoiceTags)
+    function voiceLanguage(voice) {
+        const tags = window.texcomVoiceTags;
+        return (tags && tags[voice]) || String(voice || '').split(': ')[1];
+    }
     function chooseVoiceFor(code) {
         params.voices = params.voices || {};
         const list = voiceList();
         const remembered = params.voices[code];
-        const current = (params.currentVoice || '').split(': ')[1];
+        const current = voiceLanguage(params.currentVoice);
         let pick = null;
         if (remembered && (!list.length || list.includes(remembered))) pick = remembered;
         else if (current && voiceMatches(current, code)) pick = params.currentVoice;
-        else pick = list.find(v => voiceMatches(v.split(': ')[1], code)) || null;
+        else pick = list.find(v => voiceMatches(voiceLanguage(v), code)) || null;
         if (!pick) {
             if (list.length) notify('info', t('There’s no {language} voice on this device, so TexCom will read with the voice it has. You can add voices in the device’s settings (Accessibility > Spoken Content or Speech).', { language: languageName(code) }), 12000);
             return;

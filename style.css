@@ -27,52 +27,116 @@ splash {
     -webkit-app-region: no-drag;
 }
 
-startSplash {
+/* The start screen's buttons, as PiCom: each one a little inside its own corner. Settings top right, Help bottom
+   left, Start bottom right. The gap grows with the screen, and each side also clears the status bar, camera
+   cutout and home indicator (viewport-fit=cover). Sizes follow the screen's shorter side, so the buttons are never
+   too small to tap on a phone nor oversized on a wide window, and never hang off an edge. */
+:root {
+    --splash-gap: clamp(12px, 2.5vmin, 28px);
+    --splash-top: max(var(--splash-gap), env(safe-area-inset-top));
+    --splash-right: max(var(--splash-gap), env(safe-area-inset-right));
+    --splash-bottom: max(var(--splash-gap), env(safe-area-inset-bottom));
+    --splash-left: max(var(--splash-gap), env(safe-area-inset-left));
+    --splash-start: clamp(72px, 15vmin, 150px);   /* Start, the main action */
+    --splash-button: clamp(48px, 10vmin, 100px);  /* Help and Settings */
+}
+/* Landscape phones report the camera cutout's inset on both sides; only the camera side needs it (index.html) */
+html.notch-left { --splash-right: var(--splash-gap); }
+html.notch-right { --splash-left: var(--splash-gap); }
+/* An iPhone on its side (this @supports matches only iOS): the camera cutout is half way up the short edge, well
+   clear of the corners, so the buttons keep to their corners there too, as on the side without the cutout */
+@supports (-webkit-touch-callout: none) {
+    @media (orientation: landscape) {
+        :root { --splash-left: var(--splash-gap); --splash-right: var(--splash-gap); }
+    }
+}
+
+startSplash, helpSplash, settingsSplash {
     position: absolute;
-    top: 70vh;
-    left: 75vw;
-    width: 15vw;
-    height: 15vw;
     border: none;
     cursor: pointer;
     background-color: transparent;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    z-index: 10005;
+    opacity: .8;
+    -webkit-app-region: no-drag;
+}
+startSplash:hover, helpSplash:hover, settingsSplash:hover { opacity: 1.0; }
+startSplash:active, helpSplash:active, settingsSplash:active { opacity: 0.2; }
+settingsSplash:focus-visible { outline: 3px solid white; outline-offset: 3px; border-radius: 50%; opacity: 1.0; }
+
+startSplash {
+    right: var(--splash-right);
+    bottom: var(--splash-bottom);
+    width: var(--splash-start);
+    height: var(--splash-start);
     background-image: url(images/start.png);
-    background-size: 15vw 15vw;
-    z-index: 10005;
-    opacity: .8;
-    -webkit-app-region: no-drag;
 }
-
-startSplash:hover {
-    opacity: 1.0;
-}
-
-startSplash:active {
-    opacity: 0.2;
-}
-
 helpSplash {
-    position: absolute;
-    left: 2.5vw;
-    top: 2.5vw;
-    width: 10vw;
-    height: 10vw;
-    cursor: pointer;
-    background-color: transparent;
+    left: var(--splash-left);
+    bottom: var(--splash-bottom);
+    width: var(--splash-button);
+    height: var(--splash-button);
     background-image: url(images/help.svg);
-    background-size: 10vw 10vw;
-    z-index: 10005;
-    opacity: .8;
-    -webkit-app-region: no-drag;
 }
+/* Settings (carer.js: the PIN first, if one is set) */
+settingsSplash {
+    right: var(--splash-right);
+    top: var(--splash-top);
+    width: var(--splash-button);
+    height: var(--splash-button);
+    background-image: url(images/settings.svg);
+}
+settingsSplash[hidden], helpSplash[hidden], startSplash[hidden], splash[hidden] { display: none; }
 
-    helpSplash:hover {
-        opacity: 1.0;
-    }
+/* The PIN box on the start screen (carer.js). It sits in the clear part of the screen: below the "TexCom" title in
+   the picture (which ends 57% of the way down the wide picture and 41.5% down the tall one) and, on a narrow
+   screen where the box is nearly full width, above the corner buttons. If the box is taller than that space it
+   grows upwards over the title, never off the bottom of the screen. */
+#tcSplashZone {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 57vh;
+    bottom: var(--splash-bottom);
+    z-index: 10006;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+    justify-content: safe center;
+    align-items: center;
+    pointer-events: none;
+}
+html.layout-one #tcSplashZone {
+    top: 41.5vh;
+    bottom: calc(var(--splash-bottom) + var(--splash-start) + 8px);
+}
+/* With the on-screen keyboard up (carer.js): centred in what is still showing above it */
+html.keyboard-up #tcSplashZone { top: 0; bottom: calc(var(--keyboard-inset, 0px) + 8px); }
+#tcSplashPin {
+    pointer-events: auto;
+    flex: none;
+    box-sizing: border-box;
+    width: min(24rem, calc(100vw - 2 * var(--splash-gap)));
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #1d1d1f;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    font-size: 1.05rem;
+    text-align: center;
+}
+#tcSplashPin[hidden] { display: none; }
+#tcSplashPin label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+#tcSplashPin .tcp-row { display: flex; gap: 0.5rem; }
+#tcSplashPin input { flex: 1; min-width: 0; font-size: 1.3rem; padding: 0.45rem 0.6rem; border: 1px solid #888; border-radius: 8px; text-align: center; letter-spacing: 0.2em; }
+#tcSplashPin .tcp-unlock { font-size: 1rem; padding: 0.45rem 0.9rem; border: none; border-radius: 8px; background: #0a84ff; color: white; cursor: pointer; }
+#tcSplashPin .tcp-msg { min-height: 1.2em; margin: 0.5rem 0 0.2rem; color: #b00020; }
+#tcSplashPin .tcp-forgot { border: none; background: none; color: #0a5fc2; text-decoration: underline; cursor: pointer; font-size: 0.95rem; }
 
-    helpSplash:active {
-        opacity: 0.2;
-    }
+/* Toolbar buttons hidden by a setting (carer.js: Settings, Edit) stay hidden in the toolbar and the ⋯ menu */
+#topToolbar > [hidden], #moreMenu > [hidden] { display: none !important; }
 
 #theText {
     
@@ -180,24 +244,6 @@ helpSplash {
 .rightjustify {
     display: flex;
     justify-content: flex-end;
-}
-
-@media (orientation: portrait), (max-aspect-ratio: 1/1) {
-    startSplash {
-        position: absolute;
-        top: 75vh;
-        left: 67vw;
-        width: 15vh;
-        height: 15vh;
-        border: none;
-        cursor: pointer;
-        background-color: transparent;
-        background-image: url(images/start.png);
-        background-size: 15vh 15vh;
-        z-index: 10005;
-        opacity: .8;
-        -webkit-app-region: no-drag;
-    }
 }
 
 /* Slippylist focus */

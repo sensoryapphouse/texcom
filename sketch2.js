@@ -3,9 +3,10 @@ function extractAIOptions(raw) {
     if(!raw) return [];
     
     // Attempt 1: Numbered list pattern (e.g., "1. Play 2. Walk 3. Relax" or "1) Hey 2) Hi 3) Hello")
-    // Use regex to look for the numbers and extract the text between them
+    // Use regex to look for the numbers and extract the text between them. Not when the answer is already separate
+    // phrases joined with "|" (what the apps send): "See you at 1.|Maybe at 2.|How about 3?" is three replies as they are
     let regex = /(?:1[\.\)])(.+?)(?:2[\.\)])(.+?)(?:3[\.\)])(.*)/i;
-    let matches = raw.match(regex);
+    let matches = raw.includes('|') ? null : raw.match(regex);
     if(matches && matches.length >= 4) {
         return [
             matches[1].trim().replace(/^["'*]+|["'*]+$/g, ''),
@@ -34,8 +35,21 @@ function extractAIOptions(raw) {
     return [clean.substring(0, 50), "Error parsing", "Please try again"];
 }
 
-function getFullPersona() {
+// The time as a guide for the AI: at 7am a question about food is probably about breakfast. Only the device's clock;
+// nothing is stored and nothing leaves the device (the on-device AI is the only reader).
+function timeContext(now) {
+    now = now || new Date();
+    const h = now.getHours();
+    const part = h < 5 ? 'night' : h < 11 ? 'morning' : h < 14 ? 'midday' : h < 17 ? 'afternoon' : h < 21 ? 'evening' : 'night';
+    const clock = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const day = now.toLocaleDateString('en-US', { weekday: 'long' });
+    return "Current time: " + day + " " + clock + " (" + part + "). Use it only where it helps, such as which meal or drink fits the time; never mention the time itself";
+}
+
+function getFullPersona(forPredictions) {
     let p = [];
+    // The user's name (Settings > General): "My name is" was finished with an invented one
+    if(params.UserName && params.UserName.trim()) p.push("Name: " + params.UserName.trim());
     if(params.personaPronouns && params.personaPronouns !== 'Not Specified') p.push("Pronouns: " + params.personaPronouns);
     if(params.personaTone) p.push("Tone: " + params.personaTone);
     if(params.personaFormality) p.push("Formality: " + params.personaFormality);
@@ -61,6 +75,12 @@ function getFullPersona() {
     // Replies in the user's language (Settings > General > Language)
     if (typeof currentLanguage === 'function' && currentLanguage() !== 'en') p.push("Language: write every suggestion in " + texcomLanguage(currentLanguage()).english);
     
+    // The time of day: for suggested replies always; for word predictions only once there is a conversation to place it
+    // in. On its own it pulled every prediction towards the hour ("I am" -> "going to make coffee", "How are" -> "you
+    // feeling this morning", at 6 in the morning)
+    const talking = window.rollingChatHistory && window.rollingChatHistory.length > 0;
+    if (!forPredictions || talking) p.push(timeContext());
+
     // Inject Rolling Chat History Context for better AI awareness
     if (window.rollingChatHistory && window.rollingChatHistory.length > 0) {
         let hist = window.rollingChatHistory.map(m => m.role + ": " + m.text).join(" | ");
@@ -153,6 +173,7 @@ var autoPredict = -1;
 var filterPredict = "";
 var tmrKeys = null;
 var helpSplash;
+var settingsSplash; // the start screen's Settings button (carer.js guards it with the PIN, if one is set)
 document.body.addEventListener("wheel", e=>{
   if(e.ctrlKey)
     e.preventDefault();//prevent zoom
@@ -258,7 +279,7 @@ window.onload = () => {
 
     //    localStorage.clear();
     'use strict';
-    if ('serviceWorker' in navigator && !testing && location.protocol.startsWith('http')) { // not in the native apps (file://)
+    if ('serviceWorker' in navigator && !testing && !webViewAndroid && location.protocol.startsWith('http')) { // not in the native apps (file:// on iOS and the Mac; Android's own address)
         navigator.serviceWorker
             .register('./sw.js');
     }
@@ -272,6 +293,7 @@ window.onload = () => {
 
     splash = document.querySelector('splash');
     startSplash = document.querySelector('startSplash');
+    settingsSplash = document.querySelector('settingsSplash');
     startSplash.hidden = false;
     document.documentElement.style.overflow = 'hidden'; // hide scroll barsfirefox, chrome
     document.body.scroll = "no"; // ie only
@@ -327,13 +349,15 @@ window.onload = () => {
         startSplash.hidden = true;
         splash.hidden = true;
         helpSplash.hidden = true;
+        settingsSplash.hidden = true;
         setTimeout(function() {
             setUpGUI();
         }, 100);
     }
     
     loadParams(); // the saved language decides which phrases open
-    loadManifest().then(() => { if (!startSplash.hidden) startSplash.onclick(); }); // straight in once the phrases are ready
+    // The start screen stays until Start (or Settings) is pressed; it used to go by itself once the phrases were in
+    loadManifest();
     smallPortrait = isOneColumnLayout();
     windowResized();
 
@@ -344,7 +368,8 @@ window.onload = () => {
         if (historyContainer) historyContainer.innerHTML = '';
         if (typeof toggleChatInterface === 'function') toggleChatInterface(typeof chatShouldShow === 'function' ? chatShouldShow() : params.chatInterface); // nothing to show: hides it
         
-        // Also clear any pending contextual AI phrases from the UI
+        // Also clear any pending contextual AI phrases from the UI, and any still on their way
+        if (typeof forgetReplyRequest === 'function') forgetReplyRequest();
         let msgList = document.getElementById('messagesList');
         if (msgList) {
             let oldReplies = msgList.querySelectorAll('.ai-injected-reply');
@@ -450,16 +475,26 @@ function nativeMessage(message) {
         'On-device AI is not available on this device': t('On-device AI isn’t available on this device.'),
         'On-device AI needs iOS 26 or macOS 26': t('On-device AI needs iOS 26 or macOS 26.'),
         'No expansion': t('Couldn’t expand that.'),
+        'Smart AI is getting ready': t('Smart AI is still getting ready. Try again in a moment.'), // Android, just after the phone starts
         'Not available in this language': t('Smart AI doesn’t work in {language} yet.', { language: languageName(currentLanguage()) }),
     };
     return known[message] || message;
 }
+// How long to wait for the app's AI before giving up (ms). The app answers within a second or two, or says why not;
+// this is for when nothing comes back at all.
+function aiAnswerTimeout() { return window.AI_ANSWER_TIMEOUT || 20000; }
+
+let expandTimer = null;
 window.receiveExpandedText = function(expanded) {
+    if (expandTimer === null) return; // nothing is waiting for it (it timed out, or was answered already)
+    clearTimeout(expandTimer); expandTimer = null;
     if(typeof Notiflix !== 'undefined' && Notiflix.Loading) {
         Notiflix.Loading.remove();
     }
     
     if (expanded.startsWith("Error:")) {
+        // The note stays, without the "@" that asked (it would be spoken as "at")
+        if (theText && theText.value.endsWith("@")) { theText.value = theText.value.slice(0, -1); if (typeof theText.oninput === 'function') theText.oninput({stopPropagation: () => {}, key: 'Unidentified'}); }
         if(typeof Notiflix !== 'undefined') {
             Notiflix.Notify.failure(nativeMessage(expanded.replace("Error: ", "")));
         } else {
@@ -485,13 +520,34 @@ let autoReplyDebounce = null;
 // It shows in the pill as it comes; after a 2-second pause the new words become the partner's message in the
 // chat history (which also asks the AI for suggested replies). Only words not already added are added.
 let transcriptCommitted = '';  // the part of the current utterance already in the chat history
+let transcriptPending = '';    // words heard since, shown in the pill, not yet in the chat history
+let transcriptHeard = '';      // the whole utterance as last heard
 let transcriptTimer = null;
+function commitTranscript() {
+    clearTimeout(transcriptTimer);
+    if (!transcriptPending) return;
+    const words = transcriptPending;
+    transcriptPending = '';
+    transcriptCommitted = transcriptHeard;
+    if (typeof appendToChatHistory === 'function') appendToChatHistory(words, true);
+}
 window.receiveTranscript = function(text) {
     text = String(text || '');
+    let pill = document.getElementById('liveTranscriptPill');
+    // The Android app says when a new run of listening begins (an empty transcript): the speaker paused, so what
+    // was heard is complete and goes into the conversation now, and the next words are a new utterance. (Without
+    // this, a new utterance that began with the same words as the last was taken for more of the same one.)
+    if (text === '') {
+        commitTranscript();
+        transcriptCommitted = ''; transcriptHeard = '';
+        window.currentPartnerTranscript = '';
+        if (pill) pill.style.display = 'none';
+        return;
+    }
     if (transcriptCommitted && !text.startsWith(transcriptCommitted)) transcriptCommitted = ''; // a new recognition run
     const fresh = text.slice(transcriptCommitted.length).trim();
+    transcriptHeard = text; transcriptPending = fresh;
     window.currentPartnerTranscript = fresh;
-    let pill = document.getElementById('liveTranscriptPill');
     if(pill) {
         if(fresh.length > 0) {
             pill.innerText = "💬 " + fresh;
@@ -501,13 +557,17 @@ window.receiveTranscript = function(text) {
         }
     }
     clearTimeout(transcriptTimer);
-    if (fresh) transcriptTimer = setTimeout(() => {
-        transcriptCommitted = text;
-        if (typeof appendToChatHistory === 'function') appendToChatHistory(fresh, true);
-    }, 2000);
+    if (fresh) transcriptTimer = setTimeout(commitTranscript, 2000);
 };
 
+// Replies are asked for the conversation as it is now. An answer is dropped if nothing is waiting for it: the
+// conversation was cleared meanwhile (the replies used to appear anyway), or it took too long.
+let repliesWaiting = false, repliesTimer = null;
+function forgetReplyRequest() { repliesWaiting = false; clearTimeout(repliesTimer); }
+
 window.receiveAutoReplies = function(repliesString) {
+    if (!repliesWaiting) return;
+    forgetReplyRequest();
     if (repliesString.startsWith("Error:")) {
         console.error(repliesString);
         // Don't leave the "Predicting phrases..." placeholder stuck when the app has no AI to answer
@@ -584,6 +644,11 @@ window.requestContextualPhrases = function() {
         msgList.insertBefore(li, msgList.firstChild);
     }
     
+    // If the app never answers, the "Predicting phrases…" row must not sit at the top of the phrases for ever
+    forgetReplyRequest();
+    repliesWaiting = true;
+    repliesTimer = setTimeout(function () { window.receiveAutoReplies("Error: no answer"); }, aiAnswerTimeout());
+
     let msg = "ContextualPhrases:" + historyStr;
     let fp = typeof getFullPersona === 'function' ? getFullPersona() : "";
     if(fp.length > 0) msg += "||" + fp;
@@ -606,7 +671,7 @@ function expandTextWithLLM() {
         shorthand = shorthand.slice(0, -1).trim();
     }
     if(shorthand.length > 0) {
-        let msg = "Expand:" + shorthand;
+        let msg = "Expand:" + shorthand.replace(/\|\|/g, '| |');
         if(typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom) {
             window.webkit.messageHandlers.TexCom.postMessage({"m": msg});
         } else if (typeof doingSAPI !== 'undefined' && doingSAPI && window.chrome && window.chrome.webview) {
@@ -618,14 +683,40 @@ function expandTextWithLLM() {
         if(typeof Notiflix !== 'undefined' && Notiflix.Loading) {
             Notiflix.Loading.pulse(t('Expanding…'));
         }
+        // The spinner covers the whole screen: if the app never answers, it must not stay there
+        clearTimeout(expandTimer);
+        expandTimer = setTimeout(function () { window.receiveExpandedText("Error: No expansion"); }, aiAnswerTimeout());
     }
 }
 
 let textPredictDebounce = null;
 
+// Word predictions are asked for the text as it is now; the answer takes a moment. If the text has changed by then
+// (more typed, cleared, a phrase tapped), the answer is for words that are no longer there and is dropped: it used
+// to pop up anyway, under an empty text box or after a different sentence.
+let predictionsAskedFor = null;
+function askForPredictions(text) {
+    predictionsAskedFor = text;
+    // ("||" separates the text from what follows it in the message to the app: not in the text itself)
+    let msg = "PredictNextWords:" + text.replace(/\|\|/g, '| |');
+    let fp = getFullPersona(true);
+    if(fp.length > 0) msg += "||" + fp;
+    if(typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom) {
+        window.webkit.messageHandlers.TexCom.postMessage({"m": msg});
+    } else if (typeof doingSAPI !== 'undefined' && doingSAPI && window.chrome && window.chrome.webview) {
+        window.chrome.webview.postMessage(msg);
+    } else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) {
+        window.AndroidTexCom.postMessage(JSON.stringify({"m": msg}));
+    }
+}
+
 window.receivePredictions = function(predsString) {
     let box = document.getElementById('aiPredictionBox');
     if(!box) return;
+    if (predictionsAskedFor === null || !theText || theText.value.trim() !== predictionsAskedFor) { // out of date
+        box.style.display = 'none';
+        return;
+    }
     
     if (predsString.startsWith("Error:")) {
         box.style.display = 'none';
@@ -646,25 +737,21 @@ window.receivePredictions = function(predsString) {
             btns[i].innerText = options[i];
             btns[i].onclick = function() {
                 if(theText) {
-                    // Predictions are the NEXT words, so add them (this used to replace the last word typed)
+                    // Predictions are the NEXT words, so add them (this used to replace the last word typed)...
                     let current = theText.value.replace(/\s+$/, '');
+                    // ...unless the typing stopped part-way through a word and the prediction finishes it ("I would like
+                    // a cu" + "cup of tea"): then it takes the place of the part typed (it used to give "a cu cup of tea")
+                    const plain = w => w.toLowerCase().replace(/[’‘]/g, "'").replace(/[.,!?;:]+$/, '');
+                    const part = /\s$/.test(theText.value) ? '' : plain(current.slice(current.search(/\S+$/)));
+                    const firstWord = plain(options[i].trim().split(/\s+/)[0] || '');
+                    if (part && firstWord.length > part.length && firstWord.startsWith(part)) current = current.replace(/\S+$/, '').replace(/\s+$/, '');
                     theText.value = (current.length ? current + " " : "") + options[i] + " ";
                     box.style.display = 'none';
                     // Trigger the next prediction request so they can chain words
                     if(typeof theText.oninput === 'function') {
                         theText.oninput({stopPropagation: () => {}, key: 'Unidentified'});
                     } else {
-                        // Fallback trigger
-                        let msg = "PredictNextWords:" + theText.value;
-                        let fp = getFullPersona();
-                        if(fp.length > 0) msg += "||" + fp;
-                        if(typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom) {
-                            window.webkit.messageHandlers.TexCom.postMessage({"m": msg});
-                        } else if (typeof doingSAPI !== 'undefined' && doingSAPI && window.chrome && window.chrome.webview) {
-                            window.chrome.webview.postMessage(msg);
-                        } else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) {
-                            window.AndroidTexCom.postMessage(JSON.stringify({"m": msg}));
-                        }
+                        askForPredictions(theText.value.trim()); // Fallback trigger
                     }
                     focusTextBox();
                     theText.selectionStart = theText.value.length;
@@ -684,6 +771,7 @@ window.receivePredictions = function(predsString) {
         tmrKeys = setTimeout(doPredict, 200);
         scheduleHistory(); // group typing into one undo step per pause
         clearTimeout(textPredictDebounce);
+        if (predictionsAskedFor !== null && theText.value.trim() !== predictionsAskedFor) predictionsAskedFor = null; // the text has moved on
         let box = document.getElementById('aiPredictionBox');
         if(box) box.style.display = 'none';
         
@@ -721,20 +809,7 @@ window.receivePredictions = function(predsString) {
         currentText = currentText.trim();
         if(currentText.length === 0 || !aiAllowed()) return; // word predictions: the AI, where it's allowed
         
-        textPredictDebounce = setTimeout(function() {
-            let msg = "PredictNextWords:" + currentText;
-            let fp = getFullPersona();
-            if(fp.length > 0) {
-                msg += "||" + fp;
-            }
-            if(typeof webViewIOS !== 'undefined' && webViewIOS && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.TexCom) {
-                window.webkit.messageHandlers.TexCom.postMessage({"m": msg});
-            } else if (typeof doingSAPI !== 'undefined' && doingSAPI && window.chrome && window.chrome.webview) {
-                window.chrome.webview.postMessage(msg);
-            } else if (typeof webViewAndroid !== 'undefined' && webViewAndroid && window.AndroidTexCom) {
-                window.AndroidTexCom.postMessage(JSON.stringify({"m": msg}));
-            }
-        }, 500); // 500ms debounce
+        textPredictDebounce = setTimeout(function() { askForPredictions(currentText); }, 500); // 500ms debounce
     };
 
     theText.onkeyup = function (e) { // filtering happens on input (every change, from any keyboard); not here as well
@@ -746,6 +821,10 @@ window.receivePredictions = function(predsString) {
     if (typeof applyPhraseLanguage === 'function') applyPhraseLanguage(); // <html lang>, and the app's listening language
     setInterval(function () {
         uploadButton.disabled = (theText.value.length == 0); // Share sends the typed text
+        // Predictions belong to the text they were asked for: when it changes some other way (a phrase tapped, Clear,
+        // Undo), they go (they used to stay, offering to continue a sentence that was no longer there)
+        const box = document.getElementById('aiPredictionBox');
+        if (box && box.style.display !== 'none' && theText.value.trim() !== predictionsAskedFor) box.style.display = 'none';
     }, 300);
     
     if (doingSAPI) {
@@ -1377,10 +1456,7 @@ document.getElementById('theText').addEventListener('blur', () => { setTimeout(h
 
 
 setTimeout(() => {
-    let ss = document.querySelector('startsplash');
-    if (ss && !ss.hidden) {
-        ss.onclick();
-    }
+    // (This also pressed Start after 3 seconds: the start screen now waits for Start, as it has Settings and the PIN)
     if (window.toggleChatInterface) {
         window.toggleChatInterface(typeof chatShouldShow === 'function' ? chatShouldShow() : params.chatInterface);
     }
@@ -1528,3 +1604,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const x = document.getElementById('filterClear');
     if (x) x.onclick = () => { filter.value = ''; filterPredict = ''; updateList(); };
 });
+
+
+// Android's Back button or edge swipe (the app asks, MainActivity): close whatever is open on top, and say so.
+// With nothing open the app steps aside without closing (Back used to close TexCom, losing the text being typed
+// and the conversation - easily done by accident with a swipe from the edge of the screen).
+window.texcomBack = function () {
+    const showing = id => { const e = document.getElementById(id); return !!e && !e.hidden && getComputedStyle(e).display !== 'none'; };
+    const press = id => { document.getElementById(id).click(); return true; };
+    if (showing('askOverlay')) return press('askCancel');
+    if (document.getElementById('p_cancel')) return press('p_cancel');               // the "about you" form
+    if (showing('helpOverlay')) return press('helpClose');
+    if (showing('itemEditorOverlay')) { closeItemEditor(); return true; }
+    if (showing('convDialog')) return press('convClose');
+    if (showing('settingsOverlay')) { toggleSettings(); return true; }
+    const menu = document.getElementById('moreMenu');
+    if (menu && !menu.hidden) { closeMoreMenu(); return true; }
+    if (typeof isEditing === 'function' && isEditing()) { setEditing(false); return true; }
+    return false;
+};

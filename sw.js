@@ -1,13 +1,13 @@
 // TexCom service worker: lets the web version work offline.
 // Network first (so an online user always gets the latest files), falling back to the cached copy offline.
-const CACHE = 'texcom-2026-10-08-676448e'; // scripts/build_web.py stamps the published version here
+const CACHE = 'texcom-2026-11-14-dff7f93'; // scripts/build_web.py stamps the published version here
 const CORE = [
     './', 'index.html', 'texcomhelp.html', 'partner.html', 'companion.html', 'manifest.json', 'TexCom.json', 'bell.m4a',
     // styles
     'themes.css', 'style.css', 'slip.css', 'libraries/picmo/picmostyles.css',
     // the app
     'versions.js', 'languages-list.js', 'phrase-store.js', 'language.js', 'settings.js', 'state.js', 'audio.js',
-    'sketch2.js', 'editor.js', 'conversation.js', 'partner-link.js',
+    'sketch2.js', 'editor.js', 'conversation.js', 'partner-link.js', 'carer.js',
     // libraries it cannot start without
     'libraries/slip.js',
     'libraries/peerjs.min.js', 'libraries/qrcode.min.js', 'libraries/notiflix-loading-aio-3.2.5.min.js',
@@ -18,7 +18,7 @@ const CORE = [
     // icons
     'images/apple-touch-icon.png', 'images/favicon-32.png',
     // the start screen
-    'images/splash.jpg', 'images/TexCom Portrait.jpg', 'images/start.png', 'images/help.svg'
+    'images/splash.jpg', 'images/TexCom Portrait.jpg', 'images/start.png', 'images/help.svg', 'images/settings.svg'
 ];
 
 self.addEventListener('install', event => {

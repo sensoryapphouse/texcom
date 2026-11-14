@@ -783,7 +783,9 @@ window['Slip'] = (function () {
                     //If mouse is being held down do this (TexCom: and the list hasn't scrolled under the finger)
                     if (isMouseHold && !(that.movedOrScrolled && that.movedOrScrolled())) {
                         rightButton = true;
-                        that.state.onEnd.call(that);
+                        // (TexCom: a finger resting on a row the list doesn't manage, such as a suggested reply, leaves
+                        // no state to end: this threw "Cannot read properties of undefined")
+                        if (that.state && typeof that.state.onEnd === 'function') that.state.onEnd.call(that);
                         that.usingTouch = false;
                     }
                 }, 1000);

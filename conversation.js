@@ -32,7 +32,7 @@
         return [...a].map(x => CODE_CHARS[x % CODE_CHARS.length]).join('');
     }
     function inviteLink() {
-        const base = /^https?:/.test(location.protocol) ? new URL('companion.html', location.href).href : PUBLIC_BASE + 'companion.html';
+        const base = /^https?:/.test(location.protocol) && !webViewAndroid ? new URL('companion.html', location.href).href : PUBLIC_BASE + 'companion.html'; // (the Android app's pages have an address of its own)
         return base + '?id=' + C.code;
     }
     // A code ("k7m2qx9p") or any link containing ?id=...
