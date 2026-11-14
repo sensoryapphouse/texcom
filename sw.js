@@ -1,6 +1,6 @@
 // TexCom service worker: lets the web version work offline.
 // Network first (so an online user always gets the latest files), falling back to the cached copy offline.
-const CACHE = 'texcom-2026-11-14-dff7f93'; // scripts/build_web.py stamps the published version here
+const CACHE = 'texcom-2026-11-14-3cd26da'; // scripts/build_web.py stamps the published version here
 const CORE = [
     './', 'index.html', 'texcomhelp.html', 'partner.html', 'companion.html', 'manifest.json', 'TexCom.json', 'bell.m4a',
     // styles

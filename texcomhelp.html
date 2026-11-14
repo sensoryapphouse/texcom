@@ -2,7 +2,9 @@
     <meta charset="utf-8">
     <title>TexCom Help</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <!-- Opened inside TexCom (Settings > Help) in a panel with a Close button; also works on its own. -->
+    <!-- Opened inside TexCom (Help on the start screen, or Settings > Help) in a panel with a Close button; also works on its own.
+         Text: each element's data-i18n is its key in locales/<code>.json "help". Changed or new English text gets a NEW key,
+         so other languages show it in English until it is translated, never an out-of-date translation. -->
     <style>
         :root { --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #475569; --accent: #1d4ed8; --border: #cbd5e1; --kbd: #e2e8f0; }
         @media (prefers-color-scheme: dark) {
@@ -35,9 +37,10 @@
     <h1 data-i18n="help_1">TexCom Help</h1>
     <p class="intro" data-i18n="help_2">TexCom helps you talk by typing or by choosing ready-made phrases, and it speaks them aloud.</p>
 
-    <p id="no-ai" data-i18n="help_3">You're using TexCom in a web browser. Everything here works except the features marked <span class="apps-only">apps only</span>, which need the TexCom app for iPhone, iPad or Mac.</p>
+    <p id="no-ai" data-i18n="help_85">You're using TexCom in a web browser. Everything here works except the features marked <span class="apps-only">apps only</span>, which need the TexCom app for iPhone, iPad, Mac or Android.</p>
 
     <nav aria-label="Topics">
+        <a href="#starting" data-i18n="help_86">Starting</a>
         <a href="#speaking" data-i18n="help_4">Speaking</a>
         <a href="#toolbar" data-i18n="help_5">Toolbar</a>
         <a href="#phrases" data-i18n="help_6">Phrases</a>
@@ -45,8 +48,20 @@
         <a href="#conversation" data-i18n="help_8">Talking with someone</a>
         <a href="#ai" data-i18n="help_9">Smart AI</a>
         <a href="#settings" data-i18n="help_10">Settings</a>
+        <a href="#protect" data-i18n="help_87">Protecting TexCom</a>
         <a href="#yourphrases" data-i18n="help_11">Your phrases are safe</a>
     </nav>
+
+    <section id="starting">
+        <h2 data-i18n="help_88">Starting TexCom</h2>
+        <ul>
+            <li data-i18n="help_89">TexCom opens on its start screen. Press <strong>Start</strong> (bottom right) to begin.</li>
+            <li data-i18n="help_90"><strong>Help</strong> (bottom left) opens this page. <strong>Settings</strong> (top right) opens Settings.</li>
+            <li data-i18n="help_91">To come back to the start screen later, <strong>hold a top corner</strong> of the screen for 3 seconds.</li>
+            <li data-i18n="help_92">If a PIN has been set, the start screen also has a PIN box. It is only for Settings and for changing phrases (see <a href="#protect">Protecting TexCom</a>). Start never needs the PIN.</li>
+            <li data-i18n="help_93">On an Android phone, <strong>Back</strong> closes whatever is open (Settings, Help, the phrase editor). With nothing open, it puts TexCom away without closing it.</li>
+        </ul>
+    </section>
 
     <section id="speaking">
         <h2 data-i18n="help_12">Speaking</h2>
@@ -85,6 +100,7 @@
             <li data-i18n="help_44"><strong>Favourites</strong> holds the phrases you use most. Add one with the ♡ button, or tick Favourites when editing a phrase.</li>
             <li data-i18n="help_45">Swipe (or scroll) the lists to see more.</li>
             <li data-i18n="help_46">On a larger screen, drag the bar between the two columns to make either wider.</li>
+            <li data-i18n="help_94"><strong>With a keyboard or a switch interface</strong>: <span class="kbd">Tab</span> moves to a list, the arrow keys move through it, and <span class="kbd">Enter</span> or <span class="kbd">Space</span> chooses, just as a tap does.</li>
         </ul>
     </section>
 
@@ -94,9 +110,12 @@
             <li data-i18n="help_48">Press <strong>✎ Edit</strong>. Each phrase and category gets a ✎ button, and "+ Add phrase" / "+ Add category" appear at the top of the lists.</li>
             <li data-i18n="help_49">In the editor you can change the <strong>words</strong>, the <strong>symbol</strong> (type or paste an emoji), a <strong>shortcut</strong>, and which <strong>categories</strong> it's in.</li>
             <li data-i18n="help_50"><strong>Instant message</strong>: the phrase speaks as soon as you tap it.</li>
+            <li data-i18n="help_95"><strong>Keep in a fixed position</strong>: it can't be dragged to another place in the list.</li>
+            <li data-i18n="help_96"><strong>Allow it to be deleted</strong>: untick this and it has no Delete button, so it can't be removed by mistake.</li>
             <li data-i18n="help_51"><strong>Delete</strong> removes it (you'll be asked to confirm).</li>
             <li data-i18n="help_52">In Edit mode, drag the ⠿ handle to <strong>reorder</strong> phrases or categories.</li>
             <li data-i18n="help_53">Press ✎ Edit again when you've finished.</li>
+            <li data-i18n="help_97">No ✎ Edit button? The phrases have been locked. If a PIN has been set, pressing ✎ Edit takes you to the start screen to type it first (see <a href="#protect">Protecting TexCom</a>).</li>
         </ul>
     </section>
 
@@ -105,8 +124,10 @@
         <h3 data-i18n="help_55">Face to face</h3>
         <ul>
             <li data-i18n="help_56">Press <strong>🎙</strong> and TexCom listens to the person you're talking with. What they say appears at the top of the screen, and TexCom can suggest replies. <span class="apps-only">apps only</span></li>
+            <li data-i18n="help_98">The first time, your device asks whether TexCom may use the microphone. Choose to allow it.</li>
             <li data-i18n="help_57">Settings &gt; Smart AI &gt; <strong>Start listening when TexCom opens</strong> turns the microphone on each time you start TexCom.</li>
             <li data-i18n="help_58">With a keyboard connected, the other person can press the <span class="kbd">`</span> key (next to 1 or Z), type, and press <span class="kbd">Enter</span>. Their words appear at the top of the screen. <span class="kbd">Esc</span> cancels.</li>
+            <li data-i18n="help_99"><strong>On a folding Android phone</strong>, held open, what you speak is also shown in large letters on the front screen, for the person facing you.</li>
         </ul>
         <h3 data-i18n="help_59">On their own phone or computer, anywhere</h3>
         <ul>
@@ -127,12 +148,15 @@
 
     <section id="ai">
         <h2 data-i18n="help_70">Smart AI <span class="apps-only">apps only</span></h2>
-        <p data-i18n="help_71">These run privately on your device (Apple Intelligence), so nothing you say is sent anywhere. They need a recent iPhone, iPad or Mac.</p>
+        <p data-i18n="help_100">These run privately on your device, so nothing you say is sent anywhere. They need a device with its own built-in AI: a recent iPhone, iPad or Mac with Apple Intelligence, or a recent Android phone with Gemini Nano.</p>
         <ul>
             <li data-i18n="help_72"><strong>Suggested replies</strong>: after you or your partner speak, up to three replies appear at the top of the phrase list, marked 🧠. Tap one to use it. Type <span class="kbd">^</span> to ask for new suggestions.</li>
-            <li data-i18n="help_73"><strong>Next-word predictions</strong>: as you type, likely next words appear as buttons. Tap one to add it.</li>
+            <li data-i18n="help_101"><strong>Predictions</strong>: as you type, up to three ways to carry on appear as buttons: the rest of the word you are typing, the next word or two, or a longer phrase. Tap one to add it.</li>
             <li data-i18n="help_74"><strong>Smart Expand</strong>: type a short note and end it with <span class="kbd">@</span> (for example <span class="kbd">need drink@</span>) and TexCom writes it out as a full sentence. Switch it on in Settings &gt; Smart AI.</li>
             <li data-i18n="help_75"><strong>AI persona</strong> (Settings &gt; Smart AI &gt; Edit AI persona…): tell the AI about you, such as your tone, pronouns, how to talk about your communication aid, and anything else it should know, so suggestions sound like you.</li>
+            <li data-i18n="help_102">The AI is also given your name (Settings &gt; Your name), the conversation so far, and the day and time, so that a suggestion fits the moment (breakfast in the morning, say). It is not told where you are.</li>
+            <li data-i18n="help_103"><strong>Languages</strong>: Smart AI doesn't work in every language yet. Where it doesn't, Settings &gt; Smart AI says so, and lets you try it anyway.</li>
+            <li data-i18n="help_104">On an Android phone that has just been switched on, Smart AI may say it is still getting ready. Try again in a moment.</li>
         </ul>
     </section>
 
@@ -140,9 +164,27 @@
         <h2 data-i18n="help_76">Settings</h2>
         <ul>
             <li data-i18n="help_77"><strong>Your name</strong> and <strong>theme</strong> (colours).</li>
+            <li data-i18n="help_105"><strong>Language</strong>: TexCom's own words, the voice, listening and suggested replies follow the language you choose. Each language has its own phrases, and switching keeps them all. The translations were made by computer, so they may have mistakes.</li>
+            <li data-i18n="help_106"><strong>Text size</strong>: makes everything in TexCom bigger or smaller.</li>
             <li data-i18n="help_78"><strong>Speech</strong>: choose the voice, pitch, speed and volume, and press <strong>Test voice</strong> to hear it.</li>
             <li data-i18n="help_79"><strong>Conversation</strong> and <strong>Smart AI</strong>: see above.</li>
+            <li data-i18n="help_107"><strong>Protect TexCom</strong>: see <a href="#protect">Protecting TexCom</a>.</li>
             <li data-i18n="help_80"><strong>Data</strong>: import phrases from a text file, open or save a phrase set, or share it.</li>
+            <li data-i18n="help_108"><strong>Restore previous phrases…</strong> shows in Data once you have opened a phrase set. It puts back the phrases you had before. The ones you have now are kept, so you can switch back the same way.</li>
+            <li data-i18n="help_109">The <strong>version</strong> of TexCom is at the bottom of Settings.</li>
+        </ul>
+    </section>
+
+    <section id="protect">
+        <h2 data-i18n="help_110">Protecting TexCom</h2>
+        <p data-i18n="help_111">For a carer or helper: these stop settings and phrases being changed by mistake. They are in Settings &gt; Protect TexCom. Talking with TexCom is never locked.</p>
+        <ul>
+            <li data-i18n="help_112"><strong>Settings button on the main screen</strong>: untick it and the ⚙ button leaves the toolbar. Settings is then only on the start screen (hold a top corner for 3 seconds to get there).</li>
+            <li data-i18n="help_113"><strong>Lock phrases</strong>: takes away the ✎ Edit button, so phrases and categories can't be added, changed, moved or deleted. Speaking and Favourites work as before.</li>
+            <li data-i18n="help_114"><strong>Set PIN</strong>: choose a PIN of 4 to 8 digits. From then on, Settings and changing phrases ask for the PIN on the start screen.</li>
+            <li data-i18n="help_115">When you set a PIN, TexCom shows a <strong>recovery code</strong>. Write it down and keep it safe. If the PIN is forgotten, press <strong>Forgot PIN?</strong> on the start screen and type the code.</li>
+            <li data-i18n="help_116"><strong>Change PIN</strong> and <strong>Remove PIN</strong> are in the same place.</li>
+            <li data-i18n="help_117">The PIN is kept only on this device.</li>
         </ul>
     </section>
 

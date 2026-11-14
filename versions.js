@@ -1,5 +1,5 @@
 var freeVersion = false;
-var version = "2026-11-14-dff7f93"; // the published web version: scripts/build_web.py stamps <date>-<commit> here
+var version = "2026-11-14-3cd26da"; // the published web version: scripts/build_web.py stamps <date>-<commit> here
 var testing = false;
 var isChromium = navigator.userAgent.includes("Chrome");
 var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
